@@ -1,4 +1,4 @@
-rootProject.name = 'java-service-template-v2'
+rootProject.name = 'spotinst-metrics'
 
 //include 'spotinst-commons'
 //project(':spotinst-commons').projectDir = new File('../spotinst-commons')
