@@ -1,0 +1,19 @@
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'The type of semantic version change to apply to the release.'
+        required: true
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+        default: 'patch'
+jobs:
+  call-auto-version-update:
+    uses: spotinst/devops-scripts/.github/workflows/version-update.yml@master
+    secrets: inherit
+    with:
+      release: ${{ inputs.release }}
