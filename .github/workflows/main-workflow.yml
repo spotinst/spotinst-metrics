@@ -1,0 +1,14 @@
+name: Verification
+
+
+# Controls when the action will run. Triggers the workflow on pull request
+# events but only for the listed branches
+#
+on:
+  pull_request:
+    branches: [develop , main, master]
+
+jobs:
+  call-verification-workflow:
+    uses: spotinst/devops-scripts/.github/workflows/java-verification-workflow.yml@master
+    secrets: inherit
