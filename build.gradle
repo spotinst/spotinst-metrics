@@ -1,0 +1,75 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+
+group 'com.spotinst'
+version = theVersion
+
+def lombokVersion  = '1.18.30'
+
+// Use Java 21
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://artifactory.spot.io/artifactory/spotinst-repository'
+    }
+    maven {
+        url 'https://artifactory.spot.io/artifactory/third-party'
+    }
+}
+
+// The main class of the application
+mainClassName = 'com.spotinst.service.SampleApplication'
+
+dependencies {
+
+    // Use the compile project when you need to change content on the library project
+    // On this case the library project must be defined on settings.gradle and exist in the same folder hierarchy
+    // Using the compile project allows to change files content without the need to publish version to Artifactory
+    // Publishing to Artifactory should be treated like a production deployment, once library is tested & verified
+
+//    compile project(":spotinst-commons")
+//    implementation project(":spotinst-dropwizard")
+//    compile project(":spotinst-messaging")
+    // TODO: instead of blindly taking the version here, check if a newer version is available
+    implementation(
+        'com.spotinst:spotinst-dropwizard-v4:4.0.3-SNAPSHOT',
+        'com.spotinst:spotinst-messaging:2.0.1',
+        'redis.clients:jedis:5.1.0',
+
+        // Swagger - optional
+        'com.smoketurner:dropwizard-swagger:4.0.5-1',
+        'io.swagger:swagger-jersey2-jaxrs:1.6.13'
+    )
+
+    testImplementation(
+            'junit:junit:4.13.2',
+            'io.dropwizard:dropwizard-testing:4.0.7',
+            'org.mockito:mockito-core:5.10.0'
+    )
+
+    compileOnly('org.projectlombok:lombok:' + lombokVersion)
+    annotationProcessor('org.projectlombok:lombok:' + lombokVersion)
+    testCompileOnly('org.projectlombok:lombok:' + lombokVersion)
+    testAnnotationProcessor('org.projectlombok:lombok:' + lombokVersion)
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs << '-Xlint:deprecation'
+}
+
+tasks.withType(JavaExec).configureEach {
+    jvmArgs '--add-opens', 'java.base/java.lang=ALL-UNNAMED'
+}
+
+// Configure the run task to start the Dropwizard service
+run {
+    args 'server', './src/dist/config/local.yml'
+}

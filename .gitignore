@@ -1,0 +1,41 @@
+# Please see https://github.com/github/gitignore for some nice presets
+
+# Output directories
+build/
+classes/
+out/
+target/
+src/dist/config/*.yml
+src/dist/config/*.yaml
+
+# Mac OS X files
+.DS_Store
+
+# IntelliJ IDEA files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Gradle
+.gradle/
+gradle/
+gradlew*
+
+# Log directory
+logs/
+
+# vim files
+.*.sw[a-z]
+*.un~
+
+# Java class files
+*.class
+
+# Config files
+src/dist/config/prod.yml
+src/dist/config/dev.yml
+src/dist/config/test.yml
+
+# Okteto 
+.stignore

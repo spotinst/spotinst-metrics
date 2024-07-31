@@ -1,0 +1,11 @@
+rootProject.name = 'java-service-template-v2'
+
+//include 'spotinst-commons'
+//project(':spotinst-commons').projectDir = new File('../spotinst-commons')
+
+//include 'spotinst-dropwizard'
+//project(':spotinst-dropwizard').projectDir = new File('../spotinst-dropwizard')
+
+//include 'spotinst-messaging'
+//project(':spotinst-messaging').projectDir = new File('../spotinst-messaging')
+

@@ -1,0 +1,169 @@
+##############################################
+#            CREDENTIALS/TOKENS
+##############################################
+environment: development
+jwtTokenSecret: 5ef1c3a9be445d9f14b82e8caeda92cdd6a1a8abab710ec6c418de14173cd4c9
+coreDbToken: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzcG90aW5zdCIsImV4cCI6MTg2MDk0Mjk0MywidWlkIjoic3Bvc3RpbnN0LXVzZXIiLCJvaWQiOiJzcG90aW5zdC1jb3JlIiwiaWF0IjoxNTQ1NTgyOTQzfQ.eeGDZbLdP_zP-97Ku-ReOBnfR5Vou08lI-OnHBSFxTI
+
+##############################################
+#                SWAGGER
+##############################################
+swagger:
+  resourcePackage: com.spotinst.service.api.resources.app
+
+##############################################
+#                SERVICES
+##############################################
+services:
+  eventsServiceUrl: http://events-public.dev.spotinst.com:2300
+  dbServiceUrl: http://db-java-public.dev.spotinst.com:2100
+  umsServiceUrl: http://ums-public.dev.spotinst.com:4100
+
+
+##############################################
+#                HTTP CLIENT
+##############################################
+httpClient:
+  timeout: 120000ms
+
+# Allow HTTP retires with hard limit of 3 retries or if request took more than 5000ms
+httpClientDefaultRetryCount: 3
+
+
+##############################################
+#                RATE LIMIT
+##############################################
+rateLimit:
+  byOrganization:
+    organizationDefault: 300
+    organizations:
+      606079861234: 400
+
+  byMySql:
+    mySqlDefault: 1000
+
+
+##############################################
+#            RATE LIMIT MONITORING
+##############################################
+#metrics:
+#  reporters:
+#    - type: influxdb
+#      protocol: http
+#      host: 10.14.13.142
+#      port: 8086
+#      database: spotinst_rate_limiter
+#      auth: spotinst_admin:DevInflux
+
+
+##############################################
+#               FEATURE FLAGS
+##############################################
+featureFlags:
+  sample-create-dummy: "ON"
+  sample-update-dummy: "OFF"
+  sample-get-all-dummies: "BY_ORGANIZATION"
+
+
+##############################################
+#                WEB-SERVER
+##############################################
+server:
+  applicationConnectors:
+    - type: http
+      port: 4100
+
+  adminConnectors:
+    - type: http
+      port: 4101
+
+
+##############################################
+#                    REDIS
+##############################################
+redisConfiguration:
+  host: redis-public.dev.spotinst.com
+  port: 6379
+  timeout: 2000 #timeout for connection
+  poolMaxTotal: 1000 #Maximum number of resources to create at a given time.
+  poolMaxIdle: 300 # max idle connections
+  poolMaxWaitMillis: 1000 #Max milliseconds a resource can go unused before it should be destroyed.
+  poolMinIdle: 100 #Minimum number of resources to keep in pool at any given time
+
+
+##############################################
+#                MESSAGING
+##############################################
+#messaging:
+#  # Use only for for local development, otherwise use IAM role / .aws profile
+#  #  aws:
+#  #    region: <region>
+#  #    access: <access>
+#  #    secret: <secret>
+#
+#  # Select the messages serializer type (consumer support fallback between the two)
+#  serializer: byte # json
+#  producerConfig:
+#    # Producer that is bound to a Standard/FIFO queues
+#    sqs:
+#      queues:
+#        # FIFO queue prevent duplicate messages and support ordered messages, if 'ordered' is enabled
+#        - name: spotinst-events-ci.fifo
+#          topics:
+#            - name: InternalNotification
+#              ordered: false
+#
+#  consumerConfig:
+#    queues:
+#      - name: java-service-template-ci-us-east-2
+#        topics:
+#          - name: SampleTopic
+#          - name: SampleOtherTopic
+
+
+##############################################
+#                  LOGGING
+##############################################
+logging:
+  level: INFO
+  loggers:
+    com.org.service: DEBUG
+    com.org.service.commons: INFO
+
+  appenders:
+    - type: console
+    - type: file
+      currentLogFilename: /spotinst/YOUR_SERVICE_NAME/_logs/YOUR_SERVICE_NAME.log
+      archivedLogFilenamePattern: /spotinst/YOUR_SERVICE_NAME/_logs/YOUR_SERVICE_NAME-%d{yyyy-MM-dd}.log
+      archivedFileCount: 7
+      threshold: ALL
+      timeZone: UTC
+      layout:
+        type: json
+        timestampFormat: "yyyy-MM-dd'T'HH:mm:ss,SSS"
+        prettyPrint: false
+        appendLineSeparator: true
+        includes:
+          - level
+          - mdc
+          - loggerName
+          - threadName
+          - message
+          - exception
+          - timestamp
+        exception:
+          rootFirst: false
+          depth: 10
+        customFieldNames:
+          level: "l"
+          thread: "t"
+          logger: "jc"
+          timestamp: "ts"
+          message: "message"
+          organizationId: "org"
+          accountId: "acc"
+          action: "act"
+          requestId: "rid"
+          localRequestId: "lrid"
+          exception: "exp"
+        flattenMdc: true
