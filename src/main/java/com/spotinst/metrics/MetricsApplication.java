@@ -126,6 +126,7 @@ public class MetricsApplication extends BaseApplication<MetricsConfiguration, To
         if (isOrgLoaded == false) {
             throw new ApplicationRequirementsException("Failed loading organization at service startup");
         }
+        initElasticClient();
     }
 
     private void initElasticClient() {
