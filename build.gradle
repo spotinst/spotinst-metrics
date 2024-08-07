@@ -18,10 +18,10 @@ java {
 repositories {
     mavenCentral()
     maven {
-        url 'https://artifactory.spot.io/artifactory/spotinst-repository'
+        url 'https://artifactory.internal.spot.io/artifactory/spotinst-repository'
     }
     maven {
-        url 'https://artifactory.spot.io/artifactory/third-party'
+        url 'https://artifactory.internal.spot.io/artifactory/third-party'
     }
 }
 
@@ -41,6 +41,8 @@ dependencies {
     // TODO: instead of blindly taking the version here, check if a newer version is available
     implementation(
         'com.spotinst:spotinst-dropwizard-v4:4.0.3-SNAPSHOT',
+        'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.13.4',
+        'vc.inreach.aws:aws-signing-request-interceptor:0.0.22',
         'com.spotinst:spotinst-messaging:2.0.1',
         'redis.clients:jedis:5.1.0',
 
