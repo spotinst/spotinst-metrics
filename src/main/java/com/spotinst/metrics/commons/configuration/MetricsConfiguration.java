@@ -30,6 +30,10 @@ public class MetricsConfiguration extends BaseApplicationConfiguration {
 
     @Valid
     @NotNull
+    private QueryConfig queryConfig;
+
+    @Valid
+    @NotNull
     @JsonProperty("swagger")
     public SwaggerBundleConfiguration swaggerBundleConfiguration;
     //endregion
@@ -73,6 +77,14 @@ public class MetricsConfiguration extends BaseApplicationConfiguration {
 
     public void setElastic(ElasticConfig elastic) {
         this.elastic = elastic;
+    }
+
+    public QueryConfig getQueryConfig() {
+        return queryConfig;
+    }
+
+    public void setQueryConfig(QueryConfig queryConfig) {
+        this.queryConfig = queryConfig;
     }
 
     public SwaggerBundleConfiguration getSwaggerBundleConfiguration() {

@@ -15,9 +15,45 @@ swagger:
 #                SERVICES
 ##############################################
 services:
-  eventsServiceUrl: http://events-public.dev.spotinst.com:2300
+#  eventsServiceUrl: http://events-public.dev.spotinst.com:2300
   dbServiceUrl: http://db-java-public.dev.spotinst.com:2100
   umsServiceUrl: http://ums-public.dev.spotinst.com:4100
+
+##############################################
+#                ELASTIC
+##############################################
+elastic:
+  clusterScheme: https
+  clusterHost: vpc-es-aws-statistics-dev-cl2wtyjjsmb67aia2teaama6eq.us-east-2.es.amazonaws.com
+  clusterPort: 443
+  # Values in ms
+  connectionTimeout: 3000
+  socketTimeout: 90000
+  awsInterruptionRiskIndexName: aws-markets-interruption-risk
+  awsVersionInterruptionRiskIndexName: aws-version-markets-interruption-risk
+  awsInterruptionIndexName: aws-ec2-spot-interruption
+  awsMarketUsageIndexName: aws-markets-usage
+  awsOrgMarketUsageIndexName: aws-org-markets-usage
+  awsMarketSavingsIndexName: aws-markets-savings
+  awsAzZoneIdMappingIndexName: aws-az-zone-id-mapping
+  awsMarketSpotPriceIndexName: aws-markets-spot-price
+  awsMarketDailyAverageSpotPriceIndexName: aws-markets-daily-average-spot-price
+  awsReplacementIndexName: aws-ec2-replacement
+  awsRIUtilStatisticsIndexName : aws-commitment-ri-utilization
+  awsNfuRIUtilStatisticsIndexName: aws-commitment-nfu-ri-utilization
+  awsSPUtilStatisticsIndexName : aws-commitment-sp-utilization
+  awsRebalanceRecommendationIndexName: aws-rebalance-recommendation
+  azureInterruptionIndexName: azure-compute-spot-interruption
+  azureMarketEvictionRateIndexName: azure-market-eviction-rate
+  azureMarketUsageIndexName: azure-market-usage
+  azureMarketScoreIndexName: azure-market-score
+  azureTerminatedInstanceIndexName: azure-terminated-instance
+  azureMarketLaunchScoreResultIndexName: azure-market-launch-score-result
+  gcpInterruptionIndexName: gcp-compute-preemptible-interruption
+  azureInDangerMarketIndexName: azure-in-danger-market
+  azurePredictiveReplacementIndexName: azure-predictive-replacement
+  azureMissedInterruptionIndexName: azure-missed-interruption
+  clusterRegion: us-east-2
 
 
 ##############################################
@@ -89,6 +125,20 @@ redisConfiguration:
   poolMaxIdle: 300 # max idle connections
   poolMaxWaitMillis: 1000 #Max milliseconds a resource can go unused before it should be destroyed.
   poolMinIdle: 100 #Minimum number of resources to keep in pool at any given time
+
+
+queryConfig:
+  # Limit the amount of dimension keys that can be asked for in a single request
+  # Every dimensions has its own terms aggregation on the elastic search, must be limited
+  dimensionsKeysRequestLimit: 50
+
+  # Indicate how many values should be returned for each dimension key
+  # This is the maximum cap for items in each terms aggregation bucket
+  dimensionsValuesResultPerBucketLimit: 100
+
+  # Limit the amount of indices we're enabling to query for
+  # If query limit is exceeded, we'll set a new date range of NOW - (last 30 days)
+  queryTimeLimitInDays: 32
 
 
 ##############################################

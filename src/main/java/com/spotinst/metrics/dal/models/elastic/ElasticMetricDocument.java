@@ -5,14 +5,17 @@ import com.spotinst.metrics.bl.model.BlMetric;
 import com.spotinst.metrics.bl.model.BlMetricDimension;
 
 import java.util.List;
+import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ElasticMetricDocument {
-    private String                  accountId;
-    private String                  namespace;
-    private String                  timestamp;
-    private List<BlMetricDimension> dimensions;
-    private List<BlMetric>          metrics;
+    private String                accountId;
+    private String                namespace;
+    private String                timestamp;
+//        private List<BlMetricDimension> dimensions;
+//        private List<BlMetric>          metrics;
+    private Map<String, String>   dimensions;
+    private Map<String, ElasticMetric> metrics;
 
     public ElasticMetricDocument() {
     }
@@ -33,19 +36,36 @@ public class ElasticMetricDocument {
         this.timestamp = timestamp;
     }
 
-    public List<BlMetricDimension> getDimensions() {
+//    public List<BlMetricDimension> getDimensions() {
+//        return dimensions;
+//    }
+//
+//    public void setDimensions(List<BlMetricDimension> dimensions) {
+//        this.dimensions = dimensions;
+//    }
+//
+//    public List<BlMetric> getMetrics() {
+//        return metrics;
+//    }
+//
+//    public void setMetrics(List<BlMetric> metrics) {
+//        this.metrics = metrics;
+//    }
+
+
+    public Map<String, String> getDimensions() {
         return dimensions;
     }
 
-    public void setDimensions(List<BlMetricDimension> dimensions) {
+    public void setDimensions(Map<String, String> dimensions) {
         this.dimensions = dimensions;
     }
 
-    public List<BlMetric> getMetrics() {
+    public Map<String, ElasticMetric> getMetrics() {
         return metrics;
     }
 
-    public void setMetrics(List<BlMetric> metrics) {
+    public void setMetrics(Map<String, ElasticMetric> metrics) {
         this.metrics = metrics;
     }
 

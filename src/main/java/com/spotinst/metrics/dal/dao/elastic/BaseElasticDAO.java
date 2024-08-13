@@ -1,26 +1,57 @@
 package com.spotinst.metrics.dal.dao.elastic;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spotinst.commons.mapper.json.JsonMapper;
+import com.spotinst.dropwizard.common.exceptions.dal.DalException;
 import com.spotinst.metrics.MetricsAppContext;
+import com.spotinst.metrics.bl.index.spotinst.RawIndexManager;
+import com.spotinst.metrics.dal.models.elastic.BaseIdentifiableElasticEntity;
+import com.spotinst.metrics.dal.models.elastic.ElasticMetricAggregations;
+import com.spotinst.metrics.dal.models.elastic.ElasticMetricDateRange;
+import com.spotinst.metrics.dal.models.elastic.ElasticMetricStatistics;
+import com.spotinst.metrics.dal.models.elastic.common.ElasticSearchRequest;
+import com.spotinst.metrics.dal.models.elastic.requests.ElasticMetricStatisticsRequest;
+import com.spotinst.metrics.dal.models.elastic.responses.ElasticMetricStatisticsResponse;
+import jakarta.validation.Valid;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.action.support.IndicesOptions;
+import org.elasticsearch.client.ElasticsearchClient;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.StopWatch;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.Operator;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.List;
+import java.lang.reflect.Field;
+import java.util.*;
+
+import static com.spotinst.metrics.commons.utils.EsIndexNamingUtils.generateIndicesByDateRange;
 
 public abstract class BaseElasticDAO {
     //region Members
-    protected static final Integer DEFAULT_RESPONSE_HITS_LIMIT       = 10000;
-    protected static final Integer DEFAULT_SCROLL_KEEP_ALIVE_SECONDS = 30;
+    protected static final Integer         DEFAULT_RESPONSE_HITS_LIMIT       = 10000;
+    protected static final Integer         DEFAULT_SCROLL_KEEP_ALIVE_SECONDS = 30;
+    private                TransportClient transportClient;
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper     = new ObjectMapper();
+    private static final String       DEFAULT_DOC_TYPE = "balancer";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseElasticDAO.class);
     //endregion
@@ -78,7 +109,8 @@ public abstract class BaseElasticDAO {
         RestHighLevelClient elasticClient  = MetricsAppContext.getInstance().getElasticClient();
         String              indexName      = getBaseIndexName();
         String              indexForCreate = indexName;
-        String              indexSuffix    = getIndexSuffix();
+        //        String              indexSuffix    = getIndexSuffix();
+        String indexSuffix = null;
 
         if (indexSuffix != null) {
             indexForCreate = indexName + "-" + indexSuffix;
@@ -155,17 +187,150 @@ public abstract class BaseElasticDAO {
     //    }
     //endregion
 
-    //region Protected Methods
-    //    protected <T> List<T> search(@Valid ElasticSearchRequest request, Class<T> sourceClass) throws IOException {
-    //        RestHighLevelClient elasticClient = MarketStatisticsAppContext.getInstance().getElasticClient();
-    //        SearchRequest       searchRequest = buildSearchRequest(request, sourceClass);
+    // region Protected Methods
+    //    @Override
+    public ElasticMetricStatisticsResponse getMetricsStatistics(ElasticMetricStatisticsRequest request,
+                                                                String index) throws DalException {
+
+        ElasticMetricStatisticsResponse retVal;
+
+        try {
+            ElasticMetricDateRange dateRange = request.getDateRange();
+//            String[]               indices      = generateIndicesByDateRange(dateRange, index);
+//            String                 indicesNames = logIndicesNames(indices);
+            String[] indices = new String[1];
+            indices[0] = index;
+
+            IndicesOptions options = IndicesOptions.fromOptions(true, true, true, false);
+            // New way using RestHighLevelClient
+            SearchRequest searchRequest = new SearchRequest(indices);
+            searchRequest.indicesOptions(options);
+            SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+            searchRequest.source(sourceBuilder.query(QueryBuilders.matchAllQuery()).explain(false));
+            SearchResponse searchResponse =
+                    MetricsAppContext.getInstance().getElasticClient().search(searchRequest, RequestOptions.DEFAULT);
+
+            RawIndexManager manager = new RawIndexManager(request);
+            //
+            //
+            // Set request query
+            manager.setFilters(sourceBuilder);
+            manager.setAggregations(sourceBuilder);
+//            SearchResponse searchResponse =
+//                    MetricsAppContext.getInstance().getElasticClient().search(searchRequest, RequestOptions.DEFAULT);
+            searchResponse =
+                    MetricsAppContext.getInstance().getElasticClient().search(searchRequest, RequestOptions.DEFAULT);
+            //
+            // Execute
+            StopWatch sw = new StopWatch();
+            sw.start();
+//            SearchResponse searchResponse = sourceBuilder.get();
+            sw.stop();
+//            LOGGER.info(String.format("Elastic search query on indices [%s] on type [%s] took [%s]ms", indicesNames,
+//                                      DEFAULT_DOC_TYPE, sw.totalTime().millis()));
+
+            // Parse elastic search response
+            retVal = manager.parseResponse(searchResponse);
+
+        }
+        catch (Exception ex) {
+            String errFormat = "Failed getting metric statistics from elastic search for request: %s";
+            String errMsg    = String.format(errFormat, request.toString());
+            LOGGER.error(errMsg, ex);
+            throw new DalException(errMsg, ex);
+        }
+
+        LOGGER.debug("Finished fetching metrics statistics by request filter");
+
+        return retVal;
+    }
+
+
+    //    public List<ElasticMetricStatistics> getMetricsStatistics(ElasticMetricStatisticsRequest statisticRequest) throws IOException {
+    ////        RestHighLevelClient client = MetricsAppContext.getInstance().getElasticClient();
+    //        ElasticSearchRequest request = new ElasticSearchRequest();
     //
-    //        SearchResponse searchResponse = elasticClient.search(searchRequest, RequestOptions.DEFAULT);
-    //        SearchHits     hits           = searchResponse.getHits();
+    //        // Create a BoolQueryBuilder which will be used to construct the query
+    ////        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
     //
-    //        List<T> retVal = mapHitsToEntities(hits, sourceClass);
+    //        if (statisticRequest != null) {
+    //            Map<String, Object> matches = new HashMap<>();
+    //
+    //            if (statisticRequest.getAccountId() != null) {
+    //                matches.put("accountId", statisticRequest.getAccountId());
+    //            }
+    //            if (statisticRequest.getNamespace() != null) {
+    //                matches.put("namespace", statisticRequest.getNamespace());
+    //            }
+    //            if (statisticRequest.getMetricName() != null) {
+    //                matches.put("metricName", statisticRequest.getMetricName());
+    //            }
+    //            if (statisticRequest.getStatistic() != null) {
+    //                matches.put("statistic", statisticRequest.getStatistic());
+    //            }
+    //            if (matches.size() > 0) {
+    //                ElasticSearchRequest.Filter       filter  = new ElasticSearchRequest.Filter(matches, null);
+    //                List<ElasticSearchRequest.Filter> filters = Collections.singletonList(filter);
+    //                request.setFilters(filters);
+    //            }
+    //        }
+    //
+    //        List<ElasticMetricStatistics> retVal = search(request, ElasticMetricStatistics.class);
+    //
     //        return retVal;
+    ////        // Add conditions to the query based on the request
+    ////        boolQuery.must(QueryBuilders.matchQuery("accountId", request.getAccountId()));
+    ////        boolQuery.must(QueryBuilders.matchQuery("namespace", request.getNamespace()));
+    ////        boolQuery.must(QueryBuilders.matchQuery("metricName", request.getMetricName()));
+    //
+    //        // TODO: Add more conditions based on your request object
+    //
+    ////        // Create a SearchSourceBuilder and set the query
+    ////        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+    ////        searchSourceBuilder.query(boolQuery);
+    ////
+    ////        // Create the SearchRequest and set the indices
+    ////        SearchRequest searchRequest = new SearchRequest("your_index_name");
+    ////        searchRequest.source(searchSourceBuilder);
+    ////
+    ////        // Perform the search operation
+    ////        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+    ////
+    ////        // Process the SearchResponse
+    ////        ElasticMetricStatisticsResponse response = new ElasticMetricStatisticsResponse();
+    ////        for (SearchHit hit : searchResponse.getHits().getHits()) {
+    ////            // TODO: Extract the required information from the hit and add it to the response
+    ////        }
+    //
+    ////        return response;
     //    }
+
+
+    protected <T> List<T> search(@Valid ElasticSearchRequest request, Class<T> sourceClass) throws IOException {
+        RestHighLevelClient elasticClient = MetricsAppContext.getInstance().getElasticClient();
+        SearchRequest       searchRequest = buildSearchRequest(request, sourceClass);
+
+        SearchResponse searchResponse = elasticClient.search(searchRequest, RequestOptions.DEFAULT);
+        SearchHits     hits           = searchResponse.getHits();
+
+        List<T> retVal = mapHitsToEntities(hits, sourceClass);
+        return retVal;
+    }
+
+    private String logIndicesNames(String[] indices) {
+        StringBuilder sb = new StringBuilder();
+        if (indices != null && indices.length > 0) {
+            for (String idx : indices) {
+                sb.append(idx).append(", ");
+            }
+        }
+
+        String retVal = sb.toString();
+        LOGGER.debug(String.format("Starting to fetch metrics statistics from indices [%s]...", retVal));
+
+        return retVal;
+    }
+
     //
     //    protected <T> List<T> searchWithScroll(@Valid ElasticSearchRequest request,
     //                                           Class<T> sourceClass) throws IOException {
@@ -215,36 +380,36 @@ public abstract class BaseElasticDAO {
     //                                  .size(DEFAULT_RESPONSE_HITS_LIMIT);
     //    }
     //
-    //    protected BoolQueryBuilder buildQuery(@Valid ElasticSearchRequest request) {
-    //        BoolQueryBuilder retVal = QueryBuilders.boolQuery();
-    //
-    //        List<ElasticSearchRequest.Filter> filterList = request.getFilters();
-    //
-    //        for (ElasticSearchRequest.Filter filter : filterList) {
-    //            BoolQueryBuilder    boolQueryBuilder = QueryBuilders.boolQuery();
-    //            Map<String, Object> matches          = filter.getMatches();
-    //
-    //            for (Map.Entry<String, Object> entry : matches.entrySet()) {
-    //                String name  = entry.getKey();
-    //                Object value = entry.getValue();
-    //
-    //                boolQueryBuilder.filter(QueryBuilders.matchQuery(name, value).operator(Operator.AND));
-    //            }
-    //
-    //            for (ElasticSearchRequest.Range range : filter.getRanges()) {
-    //                RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(range.getName()).gte(range.getFrom());
-    //
-    //                if (range.getTo() != null) {
-    //                    rangeQueryBuilder.lte(range.getTo());
-    //                }
-    //
-    //                boolQueryBuilder.filter(rangeQueryBuilder);
-    //            }
-    //
-    //            retVal.should(boolQueryBuilder);
-    //        }
-    //        return retVal;
-    //    }
+    protected BoolQueryBuilder buildQuery(@Valid ElasticSearchRequest request) {
+        BoolQueryBuilder retVal = QueryBuilders.boolQuery();
+
+        List<ElasticSearchRequest.Filter> filterList = request.getFilters();
+
+        for (ElasticSearchRequest.Filter filter : filterList) {
+            BoolQueryBuilder    boolQueryBuilder = QueryBuilders.boolQuery();
+            Map<String, Object> matches          = filter.getMatches();
+
+            for (Map.Entry<String, Object> entry : matches.entrySet()) {
+                String name  = entry.getKey();
+                Object value = entry.getValue();
+
+                boolQueryBuilder.filter(QueryBuilders.matchQuery(name, value).operator(Operator.AND));
+            }
+
+            for (ElasticSearchRequest.Range range : filter.getRanges()) {
+                RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(range.getName()).gte(range.getFrom());
+
+                if (range.getTo() != null) {
+                    rangeQueryBuilder.lte(range.getTo());
+                }
+
+                boolQueryBuilder.filter(rangeQueryBuilder);
+            }
+
+            retVal.should(boolQueryBuilder);
+        }
+        return retVal;
+    }
     //
     //    /**
     //     * @param searchRequest
@@ -334,53 +499,53 @@ public abstract class BaseElasticDAO {
     //endregion
 
     //region Private Methods
-    //    private <T> SearchRequest buildSearchRequest(@Valid ElasticSearchRequest request, Class<T> sourceClass) {
-    //        BoolQueryBuilder queryBuilder = buildQuery(request);
-    //
-    //        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-    //        sourceBuilder.query(queryBuilder);
-    //
-    //        Field[]      declaredFields = sourceClass.getDeclaredFields();
-    //        List<String> fieldNames     = new ArrayList<>();
-    //
-    //        for (Field field : declaredFields) {
-    //            fieldNames.add(field.getName());
-    //        }
-    //        String[] includeFields = fieldNames.toArray(new String[0]);
-    //        sourceBuilder.fetchSource(includeFields, null);
-    //
-    //        if (request.getLimit() != null) {
-    //            sourceBuilder.size(request.getLimit());
-    //        }
-    //        else {
-    //            sourceBuilder.size(DEFAULT_RESPONSE_HITS_LIMIT);
-    //        }
-    //
-    //        String        indexName = getBaseIndexName();
-    //        SearchRequest retVal    = new SearchRequest(indexName + "*");
-    //        retVal.source(sourceBuilder);
-    //
-    //        return retVal;
-    //    }
-    //
-    //    private <T> List<T> mapHitsToEntities(SearchHits hits, Class<T> entityClass) throws JsonProcessingException {
-    //        SearchHit[] searchHits = hits.getHits();
-    //        List<T>     retVal     = new ArrayList<>(searchHits.length);
-    //
-    //        boolean shouldEnrichWithDocumentId = BaseIdentifiableElasticEntity.class.isAssignableFrom(entityClass);
-    //
-    //        for (SearchHit hit : searchHits) {
-    //            T entity = objectMapper.readValue(hit.getSourceAsString(), entityClass);
-    //
-    //            if (shouldEnrichWithDocumentId) {
-    //                ((BaseIdentifiableElasticEntity) entity).setId(hit.getId());
-    //            }
-    //
-    //            retVal.add(entity);
-    //        }
-    //
-    //        return retVal;
-    //    }
+    private <T> SearchRequest buildSearchRequest(@Valid ElasticSearchRequest request, Class<T> sourceClass) {
+        BoolQueryBuilder queryBuilder = buildQuery(request);
+
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+        sourceBuilder.query(queryBuilder);
+
+        Field[]      declaredFields = sourceClass.getDeclaredFields();
+        List<String> fieldNames     = new ArrayList<>();
+
+        for (Field field : declaredFields) {
+            fieldNames.add(field.getName());
+        }
+        String[] includeFields = fieldNames.toArray(new String[0]);
+        sourceBuilder.fetchSource(includeFields, null);
+
+        if (request.getLimit() != null) {
+            sourceBuilder.size(request.getLimit());
+        }
+        else {
+            sourceBuilder.size(DEFAULT_RESPONSE_HITS_LIMIT);
+        }
+
+        String        indexName = getBaseIndexName();
+        SearchRequest retVal    = new SearchRequest(indexName + "*");
+        retVal.source(sourceBuilder);
+
+        return retVal;
+    }
+
+    private <T> List<T> mapHitsToEntities(SearchHits hits, Class<T> entityClass) throws JsonProcessingException {
+        SearchHit[] searchHits = hits.getHits();
+        List<T>     retVal     = new ArrayList<>(searchHits.length);
+
+        boolean shouldEnrichWithDocumentId = BaseIdentifiableElasticEntity.class.isAssignableFrom(entityClass);
+
+        for (SearchHit hit : searchHits) {
+            T entity = objectMapper.readValue(hit.getSourceAsString(), entityClass);
+
+            if (shouldEnrichWithDocumentId) {
+                ((BaseIdentifiableElasticEntity) entity).setId(hit.getId());
+            }
+
+            retVal.add(entity);
+        }
+
+        return retVal;
+    }
     //
     //    private <T> void scrollForResults(SearchResponse initialSearchResponse, int requestedPageSize, List<T> results,
     //                                      Class<T> sourceClass) throws IOException {

@@ -2,6 +2,8 @@ package com.spotinst.metrics.commons.configuration;
 
 import lombok.Data;
 
+import java.util.Set;
+
 /**
  * Created by Tal.Geva on 07/08/2024.
  */
@@ -39,5 +41,27 @@ public class ElasticConfig {
     private String  azureTerminatedInstanceIndexName;
     private String  azureMissedInterruptionIndexName;
     private String  clusterRegion;
+    private IndexNamePatterns indexNamePatterns;
+    private Set<String> indexNameOverriddenPatterns;
+
+    public ElasticConfig() {
+    }
+
+    public IndexNamePatterns getIndexNamePatterns() {
+        return indexNamePatterns;
+    }
+
+    public void setIndexNamePatterns(IndexNamePatterns indexNamePatterns) {
+        this.indexNamePatterns = indexNamePatterns;
+    }
+
+    public Set<String> getIndexNameOverriddenPatterns() {
+        return indexNameOverriddenPatterns;
+    }
+
+    public void setIndexNameOverriddenPatterns(Set<String> indexNameOverriddenPatterns) {
+        this.indexNameOverriddenPatterns = indexNameOverriddenPatterns;
+    }
+
     //endregion
 }
