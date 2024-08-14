@@ -2,10 +2,10 @@ package com.spotinst.metrics.bl.model;
 
 import java.util.List;
 
-public class BlMetricCreateRequest {
+public class BlMetricReportRequest {
     private List<BlMetricDocument> metricDocuments;
 
-    public BlMetricCreateRequest() {
+    public BlMetricReportRequest() {
     }
 
     public List<BlMetricDocument> getMetricDocuments() {

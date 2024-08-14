@@ -8,6 +8,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.aggregations.bucket.histogram.InternalDateHistogram;
+import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogram;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +40,7 @@ public class MetricDateHistogramAggregationParser extends BaseMetricAggregationP
             Aggregations aggs = aggsMapByKeys.get(compositeKey);
             String metricName = compositeKey.getTermKey();
 
-            InternalDateHistogram histogram = aggs.get(aggregationName);
+            ParsedDateHistogram histogram = aggs.get(aggregationName);
             if (histogram == null) {
                 String msg =
                         "Cannot get elastic search date histogram buckets for [%s], skipping to the next aggregation level/sibling";
@@ -47,9 +48,9 @@ public class MetricDateHistogramAggregationParser extends BaseMetricAggregationP
                 continue;
             }
 
-            List<InternalDateHistogram.Bucket> buckets = histogram.getBuckets();
+            List<? extends Histogram.Bucket> buckets = histogram.getBuckets();
             if (CollectionUtils.isEmpty(buckets) == false) {
-                LOGGER.debug(String.format("Starting to create response objects for DATE HISTOGRAM aggregation for metric value [%s]", metricName));
+                LOGGER.debug(String.format("Starting to report response objects for DATE HISTOGRAM aggregation for metric value [%s]", metricName));
 
                 List<ElasticMetricDatapoint> newDatapoints = new ArrayList<>();
                 for (Histogram.Bucket bucket : buckets) {

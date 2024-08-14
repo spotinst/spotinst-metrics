@@ -41,13 +41,11 @@ import java.util.*;
 import static com.spotinst.metrics.commons.constants.MetricsConstants.Aggregations.*;
 import static com.spotinst.metrics.commons.constants.MetricsConstants.ElasticMetricConstants.*;
 import static com.spotinst.metrics.commons.constants.MetricsConstants.FieldPath.METRIC_COUNT_FIELD_PATH_FORMAT;
+import static com.spotinst.metrics.commons.constants.MetricsConstants.FieldPath.METRIC_KEYWORD_SUFFIX;
 import static com.spotinst.metrics.commons.constants.MetricsConstants.MetricScripts.AVG_BUCKET_SCRIPT_FORMAT;
 import static com.spotinst.metrics.commons.constants.MetricsConstants.MetricScripts.EMPTY_COUNT_BUCKET_SCRIPT_FORMAT;
 import static com.spotinst.metrics.commons.constants.MetricsConstants.Namespace.*;
 
-/**
- * Created by zachi.nachshon on 4/24/17.
- */
 public abstract class BaseIndexManager<T extends ElasticMetricStatisticsRequest>
         implements IFilterBuilder, IAggregationBuilder, ISearchResponseParser {
 
@@ -116,7 +114,7 @@ public abstract class BaseIndexManager<T extends ElasticMetricStatisticsRequest>
         if(CollectionUtils.isEmpty(dimensions) == false) {
             retVal = new ArrayList<>();
 
-            LOGGER.debug("Starting to create match query filter...");
+            LOGGER.debug("Starting to report match query filter...");
             // Filters with the same key should have the OR operator between them.
             // Example: multiple dimensions with different values e.g target_id with id-123 and id-234
             Map<String, List<Object>> sameDimensionQueries = new HashMap<>();
@@ -144,7 +142,7 @@ public abstract class BaseIndexManager<T extends ElasticMetricStatisticsRequest>
 
             LOGGER.debug(String.format("Created terms queries for [%s] dimensions", sameDimensionQueries.size()));
         } else {
-            String errMsg = "Missing dimensions to create terms queries, must have at least one dimension. Cannot create filter";
+            String errMsg = "Missing dimensions to report terms queries, must have at least one dimension. Cannot report filter";
             LOGGER.error(errMsg);
             throw new DalException(errMsg);
         }
@@ -170,7 +168,7 @@ public abstract class BaseIndexManager<T extends ElasticMetricStatisticsRequest>
             }
         }
 
-        retVal = new TermsQueryBuilder(NAMESPACE_FIELD_PATH, namespaces);
+        retVal = new TermsQueryBuilder(NAMESPACE_FIELD_PATH + METRIC_KEYWORD_SUFFIX, namespaces);
         return retVal;
     }
 
@@ -196,7 +194,7 @@ public abstract class BaseIndexManager<T extends ElasticMetricStatisticsRequest>
         ElasticMetricDateRange dateRange  = request.getDateRange();
 
         if(dateRange != null && dateRange.getFrom() != null && dateRange.getTo() != null) {
-            LOGGER.debug("Starting to create query based on date range...");
+            LOGGER.debug("Starting to report query based on date range...");
 
             Date fromDate = dateRange.getFrom();
             Date toDate   = dateRange.getTo();
@@ -208,7 +206,7 @@ public abstract class BaseIndexManager<T extends ElasticMetricStatisticsRequest>
             LOGGER.debug(String.format("Finished creating query based on date range, from [%s] to [%s]",
                                        fromDate, toDate));
         } else {
-            LOGGER.debug("Cannot create query, missing [dateRange] values");
+            LOGGER.debug("Cannot report query, missing [dateRange] values");
         }
 
         return rangeQuery;
@@ -340,7 +338,7 @@ public abstract class BaseIndexManager<T extends ElasticMetricStatisticsRequest>
             break;
             default: {
                 isLegalStat = false;
-                String format = "Statistics [%s] is not supported, cannot create aggregation based on statistic.";
+                String format = "Statistics [%s] is not supported, cannot report aggregation based on statistic.";
                 String errMsg = String.format(format, statistic);
                 LOGGER.error(errMsg);
             }
@@ -394,7 +392,7 @@ public abstract class BaseIndexManager<T extends ElasticMetricStatisticsRequest>
             break;
             default: {
                 isLegalStat = false;
-                String format = "Statistics [%s] is not supported, cannot create aggregation based on statistic.";
+                String format = "Statistics [%s] is not supported, cannot report aggregation based on statistic.";
                 errMsg = String.format(format, statistic);
                 LOGGER.error(errMsg);
             }
@@ -418,7 +416,7 @@ public abstract class BaseIndexManager<T extends ElasticMetricStatisticsRequest>
 
         if(timeInterval != null) {
             String timeIntervalStr = timeInterval.getName();
-            LOGGER.debug(String.format("Starting to create time interval aggregation of [%s]...", timeInterval));
+            LOGGER.debug(String.format("Starting to report time interval aggregation of [%s]...", timeInterval));
 
             // Add date histogram aggregation
             dateAgg = new DateHistogramAggregationBuilder(AGG_DATE_HISTOGRAM_NAME);
@@ -457,7 +455,7 @@ public abstract class BaseIndexManager<T extends ElasticMetricStatisticsRequest>
         List<String> groupByDimensions = request.getGroupBy();
 
         if(CollectionUtils.isEmpty(groupByDimensions) == false) {
-            LOGGER.debug("Starting to create [groupBy] aggregation...");
+            LOGGER.debug("Starting to report [groupBy] aggregation...");
 
             List<TermsAggregationBuilder> groupByAggsOrder = new ArrayList<>();
             TermsAggregationBuilder       lastAgg          = null;
@@ -499,7 +497,7 @@ public abstract class BaseIndexManager<T extends ElasticMetricStatisticsRequest>
         ElasticMetricRange      range  = request.getRange();
 
         if(range != null && range.hasPartialData() == false) {
-            LOGGER.debug("Starting to create range aggregation...");
+            LOGGER.debug("Starting to report range aggregation...");
 
             String metricQueryFieldPath = getMetricQueryFieldPath();
 
@@ -512,7 +510,7 @@ public abstract class BaseIndexManager<T extends ElasticMetricStatisticsRequest>
             Double gap     = range.getGap();
 
             if(gap == 0 || (minimum == 0 && maximum == 0)) {
-                String errMsg = "Cannot create range aggregation when min;max;gap values are 0";
+                String errMsg = "Cannot report range aggregation when min;max;gap values are 0";
                 LOGGER.error(errMsg);
                 throw new DalException(errMsg);
             } else {

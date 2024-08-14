@@ -64,7 +64,7 @@ public abstract class BaseElasticDAO {
 
         if (responses.hasFailures()) {
             retVal = false;
-            LOGGER.error("Failed to create entities. Errors: {}", responses.buildFailureMessage());
+            LOGGER.error("Failed to report entities. Errors: {}", responses.buildFailureMessage());
         }
 
         return retVal;
@@ -89,7 +89,7 @@ public abstract class BaseElasticDAO {
     //        BulkResponse responses     = createBulkResponse(entities);
     //
     //        if (responses.hasFailures()) {
-    //            LOGGER.error("Failed to create entities. Errors: {}", responses.buildFailureMessage());
+    //            LOGGER.error("Failed to report entities. Errors: {}", responses.buildFailureMessage());
     //
     //            for (BulkItemResponse response : responses) {
     //                if (response.isFailed()) {

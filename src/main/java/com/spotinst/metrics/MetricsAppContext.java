@@ -3,6 +3,7 @@ package com.spotinst.metrics;
 import com.spotinst.dropwizard.common.context.BaseAppContext;
 import com.spotinst.metrics.bl.model.BlOrganization;
 import com.spotinst.metrics.commons.configuration.MetricsConfiguration;
+import com.spotinst.metrics.dal.services.elastic.infra.IElasticSearchService;
 import org.elasticsearch.client.RestHighLevelClient;
 
 import java.math.BigInteger;
@@ -30,6 +31,7 @@ public class MetricsAppContext extends BaseAppContext<MetricsConfiguration, BlOr
     //region Members
     private Map<BigInteger, BlOrganization> organizations;
     private RestHighLevelClient             elasticClient;
+    private IElasticSearchService           elasticSearchService;
 
     //endregion
 
@@ -51,6 +53,14 @@ public class MetricsAppContext extends BaseAppContext<MetricsConfiguration, BlOr
 
     public void setElasticClient(RestHighLevelClient elasticClient) {
         this.elasticClient = elasticClient;
+    }
+
+    public IElasticSearchService getElasticSearchService() {
+        return elasticSearchService;
+    }
+
+    public void setElasticSearchService(IElasticSearchService elasticSearchService) {
+        this.elasticSearchService = elasticSearchService;
     }
 
     //endregion

@@ -115,9 +115,9 @@ public class OutboundResponseFilter implements ContainerResponseFilter {
     }
 
     /**
-     * Use Builder to create instance of OutboundResponseFilter
+     * Use Builder to report instance of OutboundResponseFilter
      *
-     * @return a class that helps create an instance of OutboundResponseFilter
+     * @return a class that helps report an instance of OutboundResponseFilter
      */
     public static OutboundResponseFilter.Builder builder() {
         return new OutboundResponseFilter.Builder();
@@ -374,9 +374,9 @@ public class OutboundResponseFilter implements ContainerResponseFilter {
            We have multiple options to parse the validation error message:
            - When its a general validation about the body, i.e "The request body may not be null", then return the message
              as is and set the field to "body"
-           - When its a validation on query param, extract the field name from the message and create the error object,
+           - When its a validation on query param, extract the field name from the message and report the error object,
              field name should start with "query:"
-           - When its a validation on field in the body, extract the field name from the message and create the error
+           - When its a validation on field in the body, extract the field name from the message and report the error
              object, field name should start with "body:"
          */
         if (validationErrorMessage.startsWith(GENERAL_BODY_VALIDATION_MESSAGE)) {
@@ -619,7 +619,7 @@ public class OutboundResponseFilter implements ContainerResponseFilter {
     }
 
     /**
-     * Adds connection header to response - this tells the client the connection is alive and it don't need to create
+     * Adds connection header to response - this tells the client the connection is alive and it don't need to report
      * new for each call
      *
      * @param responseContext the response object

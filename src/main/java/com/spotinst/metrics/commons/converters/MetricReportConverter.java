@@ -5,7 +5,7 @@ import com.spotinst.dropwizard.common.context.RequestsContextManager;
 import com.spotinst.metrics.api.model.ApiMetric;
 import com.spotinst.metrics.api.model.ApiMetricDimension;
 import com.spotinst.metrics.api.model.ApiMetricDocument;
-import com.spotinst.metrics.api.requests.ApiMetricsCreateRequest;
+import com.spotinst.metrics.api.requests.ApiMetricsReportRequest;
 import com.spotinst.metrics.api.responses.ApiMetricStatisticsResponse;
 import com.spotinst.metrics.bl.model.*;
 import com.spotinst.metrics.bl.model.responses.BlMetricStatisticsResponse;
@@ -21,8 +21,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class MetricReportConverter {
-    public static BlMetricCreateRequest apiToBl(ApiMetricsCreateRequest apiRequest) {
-        BlMetricCreateRequest retVal = new BlMetricCreateRequest();
+    public static BlMetricReportRequest apiToBl(ApiMetricsReportRequest apiRequest) {
+        BlMetricReportRequest retVal = new BlMetricReportRequest();
 
         List<BlMetricDocument> blMetricDocuments =
                 apiRequest.getMetricDocuments().stream().map(MetricReportConverter::apiToBl).collect(Collectors.toList());
@@ -95,7 +95,7 @@ public class MetricReportConverter {
 //        return retVal;
 //    }
 
-    public static ElasticMetricReportRequest toEs(BlMetricCreateRequest request) {
+    public static ElasticMetricReportRequest toEs(BlMetricReportRequest request) {
         ElasticMetricReportRequest retVal = new ElasticMetricReportRequest();
         List<ElasticMetricDocument> esDocumentList = new ArrayList<>();
 

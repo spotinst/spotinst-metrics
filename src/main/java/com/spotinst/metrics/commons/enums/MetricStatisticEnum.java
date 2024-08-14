@@ -63,7 +63,7 @@ public enum MetricStatisticEnum {
 
         if (retVal == null) {
             LOGGER.error(
-                    String.format("Tried to create metrics statistics enum for: %s, but we don't support such type",
+                    String.format("Tried to report metrics statistics enum for: %s, but we don't support such type",
                                   name));
         }
 

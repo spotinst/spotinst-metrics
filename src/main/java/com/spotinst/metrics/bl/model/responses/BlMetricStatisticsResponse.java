@@ -3,9 +3,6 @@ package com.spotinst.metrics.bl.model.responses;
 import com.spotinst.metrics.bl.model.BlMetricAggregations;
 import java.util.List;
 
-/**
- * Created by zachi.nachshon on 1/17/17.
- */
 public class BlMetricStatisticsResponse {
     private List<BlMetricAggregations> aggregations;
 

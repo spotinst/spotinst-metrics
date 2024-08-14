@@ -12,10 +12,10 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ApiMetricsCreateRequest {
+public class ApiMetricsReportRequest {
     private List<ApiMetricDocument> metricDocuments;
 
-    public ApiMetricsCreateRequest() {
+    public ApiMetricsReportRequest() {
     }
 
     public List<ApiMetricDocument> getMetricDocuments() {

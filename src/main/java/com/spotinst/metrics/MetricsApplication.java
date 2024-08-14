@@ -20,6 +20,7 @@ import com.spotinst.metrics.bl.jobs.LoadOrganizationsJob;
 import com.spotinst.metrics.commons.configuration.ElasticConfig;
 import com.spotinst.metrics.commons.configuration.MetricsConfiguration;
 import com.spotinst.metrics.commons.configuration.ratelimit.OrganizationToMySqlMapper;
+import com.spotinst.metrics.dal.services.elastic.infra.ElasticSearchService;
 import io.dropwizard.jobs.Job;
 import io.dropwizard.servlets.tasks.Task;
 import org.apache.http.HttpHost;
@@ -127,6 +128,7 @@ public class MetricsApplication extends BaseApplication<MetricsConfiguration, To
             throw new ApplicationRequirementsException("Failed loading organization at service startup");
         }
         initElasticClient();
+        MetricsAppContext.getInstance().setElasticSearchService(new ElasticSearchService());
     }
 
     private void initElasticClient() {

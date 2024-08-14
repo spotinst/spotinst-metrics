@@ -1,29 +1,16 @@
-package com.spotinst.metrics.bl.repos.impl;
+package com.spotinst.metrics.dal.services.elastic.metric;
 
 import com.spotinst.commons.mapper.json.JsonMapper;
-import com.spotinst.dropwizard.bl.repo.RepoGenericResponse;
-import com.spotinst.dropwizard.common.exceptions.ExceptionHelper;
 import com.spotinst.dropwizard.common.exceptions.dal.DalException;
 import com.spotinst.metrics.MetricsAppContext;
 import com.spotinst.metrics.bl.index.spotinst.RawIndexManager;
-import com.spotinst.metrics.bl.model.BlMetricReportRequest;
-import com.spotinst.metrics.bl.model.BlMetricStatisticsRequest;
-import com.spotinst.metrics.bl.model.responses.BlMetricStatisticsResponse;
-import com.spotinst.metrics.bl.repos.interfaces.IMetricRepo;
-import com.spotinst.metrics.commons.converters.MetricReportConverter;
-import com.spotinst.metrics.commons.converters.MetricStatisticConverter;
 import com.spotinst.metrics.commons.utils.EsIndexNamingUtils;
-import com.spotinst.metrics.dal.dao.elastic.MetricDAO;
 import com.spotinst.metrics.dal.models.elastic.ElasticMetricDateRange;
 import com.spotinst.metrics.dal.models.elastic.ElasticMetricDocument;
 import com.spotinst.metrics.dal.models.elastic.EsMetricResultStatus;
-import com.spotinst.metrics.dal.models.elastic.requests.ElasticMetricReportRequest;
 import com.spotinst.metrics.dal.models.elastic.requests.ElasticMetricStatisticsRequest;
 import com.spotinst.metrics.dal.models.elastic.responses.ElasticMetricStatisticsResponse;
 import com.spotinst.metrics.dal.models.elastic.responses.EsMetricReportResponse;
-import com.spotinst.metrics.dal.services.elastic.infra.ElasticSearchService;
-import com.spotinst.metrics.dal.services.elastic.infra.IElasticSearchService;
-import com.spotinst.metrics.dal.services.elastic.metric.ElasticMetricService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -33,6 +20,7 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.IndicesOptions;
 import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.StopWatch;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -44,56 +32,19 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 
-import static com.spotinst.metrics.commons.utils.EsIndexNamingUtils.generateDailyIndexName;
+public class ElasticMetricService implements IElasticMetricService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ElasticMetricService.class);
 
-/**
- * @author Tal.Geva
- * @since 07/08/2024
- */
-public class MetricRepo implements IMetricRepo {
+//    public ElasticMetricService(TransportClient transportClient, BulkProcessor bulkProcessor) {
+////        this.transportClient = transportClient;
+////        this.bulkProcessor = bulkProcessor;
+//    }
 
-    //region Members
-    private static final Logger        LOGGER = LoggerFactory.getLogger(MetricRepo.class);
-    private BulkProcessor         bulkProcessor;
-    private IElasticSearchService elasticService;
 
-    public MetricRepo() {
-        initInjections();
+    public ElasticMetricService() {
     }
 
-    private void initInjections() {
-        this.elasticService = MetricsAppContext.getInstance().getElasticSearchService();
-    }
-
-
-    // Document type
-    private static final String DEFAULT_DOC_TYPE = "balancer";
-
-    //endregion
-
-    //region Override Methods
     @Override
-    public RepoGenericResponse<EsMetricReportResponse> report(BlMetricReportRequest request, String index) {
-        RepoGenericResponse<EsMetricReportResponse> retVal;
-
-        ElasticMetricReportRequest  esMetricReportRequest = MetricReportConverter.toEs(request);
-        List<ElasticMetricDocument> dalMetrics            = esMetricReportRequest.getMetricDocuments();
-
-        try {
-//            EsMetricReportResponse reportResponse = elasticService.reportMetrics(dalMetrics, index);
-            EsMetricReportResponse reportResponse = reportMetrics(dalMetrics, index);
-            retVal = new RepoGenericResponse<>(reportResponse);
-        }
-        catch (DalException ex) {
-            LOGGER.error("Failed to report metrics in ES. Error: {}", ex.getMessage());
-
-            DalException dalException = new DalException(ex.getMessage(), ex.getCause());
-            retVal = ExceptionHelper.handleDalException(dalException);
-        }
-
-        return retVal;
-    }
-
     public EsMetricReportResponse reportMetrics(List<ElasticMetricDocument> esMetricDocuments, String index) throws DalException {
         EsMetricReportResponse retVal = new EsMetricReportResponse();
 
@@ -136,36 +87,6 @@ public class MetricRepo implements IMetricRepo {
         return retVal;
     }
 
-
-    @Override
-    public RepoGenericResponse<BlMetricStatisticsResponse> getMetricsStatistics(BlMetricStatisticsRequest request,
-                                                                                String index) {
-        RepoGenericResponse<BlMetricStatisticsResponse> retVal;
-
-        try {
-            ElasticMetricStatisticsRequest  esGetMetricStatsRequest = MetricStatisticConverter.toEs(request);
-//                        ElasticMetricStatisticsResponse
-//                                            esMetricResp            = elasticService.getMetricsStatistics(esGetMetricStatsRequest, index);
-            ElasticMetricStatisticsResponse
-                    esMetricResp            = getMetricsStatistics(esGetMetricStatsRequest, index);
-            //            List<ElasticMetricStatistics> dalMetrics = dao.getAll(request, index);
-//            MetricDAO dao       = new MetricDAO();
-
-//            ElasticMetricStatisticsResponse
-//                    esMetricResp = dao.getMetricsStatistics(esGetMetricStatsRequest, index);
-
-            // Exclude metric documents with empty data points
-//            List<BlMetricStatistics> blMetricResp = MetricStatisticConverter.dalToBl(dalMetrics);
-            BlMetricStatisticsResponse blMetricResp = MetricStatisticConverter.toBl(esMetricResp);
-            retVal = new RepoGenericResponse<>(blMetricResp);
-        }
-        catch (DalException e) {
-            retVal = ExceptionHelper.handleDalException(e);
-        }
-
-        return retVal;
-    }
-
     public ElasticMetricStatisticsResponse getMetricsStatistics(ElasticMetricStatisticsRequest request,
                                                                 String index) throws DalException {
 
@@ -184,21 +105,27 @@ public class MetricRepo implements IMetricRepo {
             searchRequest.indicesOptions(options);
             SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
             searchRequest.source(sourceBuilder.query(QueryBuilders.matchAllQuery()).explain(false));
+            SearchResponse searchResponse =
+                    MetricsAppContext.getInstance().getElasticClient().search(searchRequest, RequestOptions.DEFAULT);
 
             RawIndexManager manager = new RawIndexManager(request);
-
+            //
+            //
             // Set request query
             manager.setFilters(sourceBuilder);
             manager.setAggregations(sourceBuilder);
-            SearchResponse searchResponse =
+            //            SearchResponse searchResponse =
+            //                    MetricsAppContext.getInstance().getElasticClient().search(searchRequest, RequestOptions.DEFAULT);
+            searchResponse =
                     MetricsAppContext.getInstance().getElasticClient().search(searchRequest, RequestOptions.DEFAULT);
             //
             // Execute
             StopWatch sw = new StopWatch();
             sw.start();
+            //            SearchResponse searchResponse = sourceBuilder.get();
             sw.stop();
-//            LOGGER.info(String.format("Elastic search query on indices [%s] on type [%s] took [%s]ms", indicesNames,
-//                                                  DEFAULT_DOC_TYPE, sw.totalTime().millis()));
+            //            LOGGER.info(String.format("Elastic search query on indices [%s] on type [%s] took [%s]ms", indicesNames,
+            //                                      DEFAULT_DOC_TYPE, sw.totalTime().millis()));
 
             // Parse elastic search response
             retVal = manager.parseResponse(searchResponse);

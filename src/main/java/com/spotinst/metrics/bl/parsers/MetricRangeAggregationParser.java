@@ -60,7 +60,7 @@ public class MetricRangeAggregationParser extends BaseMetricAggregationParser<El
                 continue;
             }
 
-            LOGGER.debug(String.format("Starting to create response objects for RANGE aggregation value [%s]", aggregationName));
+            LOGGER.debug(String.format("Starting to report response objects for RANGE aggregation value [%s]", aggregationName));
 
             // This is the metric we're going to break into smaller sequential range groups for this iteration
             ElasticMetricAggregations iterationMetricSequence;

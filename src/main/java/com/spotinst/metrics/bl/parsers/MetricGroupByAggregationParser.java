@@ -68,7 +68,7 @@ public Map<AggCompositeKey, Aggregations> parse(Map<AggCompositeKey, Aggregation
         }
         }
         }
-        LOGGER.debug(String.format("Starting to create response objects for GROUP BY aggregation value [%s]",
+        LOGGER.debug(String.format("Starting to report response objects for GROUP BY aggregation value [%s]",
         groupByValue));
 
         List<Terms.Bucket> buckets = (List<Terms.Bucket>) terms.getBuckets();
