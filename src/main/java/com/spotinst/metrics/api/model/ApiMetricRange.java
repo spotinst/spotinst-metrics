@@ -1,8 +1,13 @@
 package com.spotinst.metrics.api.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Created by Tal.Geva on 07/08/2024.
  */
+@Setter
+@Getter
 public class ApiMetricRange {
     private Double minimum;
     private Double maximum;
@@ -11,27 +16,4 @@ public class ApiMetricRange {
     public ApiMetricRange() {
     }
 
-    public Double getMinimum() {
-        return minimum;
-    }
-
-    public void setMinimum(Double minimum) {
-        this.minimum = minimum;
-    }
-
-    public Double getMaximum() {
-        return maximum;
-    }
-
-    public void setMaximum(Double maximum) {
-        this.maximum = maximum;
-    }
-
-    public Double getGap() {
-        return gap;
-    }
-
-    public void setGap(Double gap) {
-        this.gap = gap;
-    }
 }

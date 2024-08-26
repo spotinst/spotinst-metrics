@@ -1,39 +1,20 @@
 package com.spotinst.metrics.commons.configuration.ratelimit;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 
 import static com.spotinst.dropwizard.common.constants.ServiceConstants.Database.CORE_DB_NAME;
 import static com.spotinst.dropwizard.common.constants.ServiceConstants.Database.STATISTICS_DB_NAME;
 
+@Setter
+@Getter
 public class DbOrganizationMappingConfiguration {
 
     private String                       coreDb;
     private String                       statisticsDb;
     private List<DbMappingConfiguration> organizationsDb;
-
-    public String getCoreDb() {
-        return coreDb;
-    }
-
-    public void setCoreDb(String coreDb) {
-        this.coreDb = coreDb;
-    }
-
-    public String getStatisticsDb() {
-        return statisticsDb;
-    }
-
-    public void setStatisticsDb(String statisticsDb) {
-        this.statisticsDb = statisticsDb;
-    }
-
-    public List<DbMappingConfiguration> getOrganizationsDb() {
-        return organizationsDb;
-    }
-
-    public void setOrganizationsDb(List<DbMappingConfiguration> organizationsDb) {
-        this.organizationsDb = organizationsDb;
-    }
 
     public String getDbName(String organizationId) {
         String retVal;

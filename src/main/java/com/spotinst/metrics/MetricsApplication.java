@@ -128,7 +128,6 @@ public class MetricsApplication extends BaseApplication<MetricsConfiguration, To
             throw new ApplicationRequirementsException("Failed loading organization at service startup");
         }
         initElasticClient();
-        MetricsAppContext.getInstance().setElasticSearchService(new ElasticSearchService());
     }
 
     private void initElasticClient() {

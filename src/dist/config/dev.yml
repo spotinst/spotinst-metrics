@@ -19,6 +19,20 @@ services:
   dbServiceUrl: http://db-java-public.dev.spotinst.com:2100
   umsServiceUrl: http://ums-public.dev.spotinst.com:4100
 
+indexConfig:
+  # Thread pool size for reporting metric documents
+  reportMetricThreadPoolSize: 4
+
+metadataCache:
+  # Limit the amount of unique dimensions per account that can be saved into cache
+  maxCachedDimensionsLimitPerAccount: 20
+
+  # Limit the amount of unique metrics per dimension per account that can be saved into cache
+  maxCachedMetricsLimitPerAccountDimension: 50
+
+  # Thread pool size for updating the metric metadata cache
+  updateCacheThreadPoolSize: 4
+
 ##############################################
 #                ELASTIC
 ##############################################
@@ -54,6 +68,8 @@ elastic:
   azurePredictiveReplacementIndexName: azure-predictive-replacement
   azureMissedInterruptionIndexName: azure-missed-interruption
   clusterRegion: us-east-2
+#  indexNameOverriddenPatterns: [ "spot_storage", "azure_stateful_opt", "azure_ocean_opt" ]
+  indexNameOverriddenPatterns: [ "metrics_report_test"]
 
 
 ##############################################

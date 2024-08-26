@@ -89,7 +89,7 @@ public class EsIndexNamingUtils {
         String retVal;
 
         if(index.endsWith("_%s") == false) {
-            index = index + "_%s";
+            index = index + "-%s";
         }
 
         retVal = index;

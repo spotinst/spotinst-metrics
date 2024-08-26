@@ -2,17 +2,16 @@ package com.spotinst.metrics.api.resources.app;
 
 import com.spotinst.commons.response.api.ServiceEmptyResponse;
 import com.spotinst.commons.response.api.items.ServiceResponseItems;
-import com.spotinst.dropwizard.common.context.RequestsContextManager;
 import com.spotinst.metrics.api.requests.ApiMetricStatisticsRequest;
 import com.spotinst.metrics.api.requests.ApiMetricsReportRequest;
 import com.spotinst.metrics.api.responses.ApiMetricStatisticsResponse;
-import com.spotinst.metrics.bl.cmds.ReportMetricCmd;
-import com.spotinst.metrics.bl.cmds.GetMetricsStatisticsCmd;
-import com.spotinst.metrics.bl.model.BlMetricReportRequest;
+import com.spotinst.metrics.bl.cmds.metric.GetMetricsStatisticsCmd;
+import com.spotinst.metrics.bl.cmds.metric.ReportMetricsCmdRunnable;
 import com.spotinst.metrics.bl.model.BlMetricStatisticsRequest;
 import com.spotinst.metrics.bl.model.responses.BlMetricStatisticsResponse;
 import com.spotinst.metrics.commons.converters.MetricReportConverter;
 import com.spotinst.metrics.commons.converters.MetricStatisticConverter;
+import com.spotinst.metrics.commons.threadpool.ReportMetricsCmdExecutor;
 import com.spotinst.metrics.commons.validators.OverriddenIndexValidation;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -25,13 +24,9 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 import javax.validation.Valid;
 
-import java.io.IOException;
-
-import static com.spotinst.dropwizard.common.constants.ServiceConstants.MDC.MDC_NAME_ACTION;
 import static com.spotinst.metrics.commons.constants.MetricsConstants.Resources.METRICS_RESOURCE_PATH;
 
 /**
@@ -47,36 +42,29 @@ public class MetricsResource {
 
 
     @Context
-    private ResourceContext resourceContext;
+    private ResourceContext resourceContext; //TODO Tal: Ask ziv if i need it
 
     @POST
     @Path("")
-    //TODO Tal: Check ApiOperation and ManagedAsync usage
-    //    @ApiOperation("Create metrics")
-    //    @ManagedAsync
-    public ServiceEmptyResponse createMetrics(@Suspended AsyncResponse asyncResponse,
+    public ServiceEmptyResponse reportMetrics(@Suspended AsyncResponse asyncResponse,
                                               @Valid ApiMetricsReportRequest request,
                                               @OverriddenIndexValidation @QueryParam("index") String index) {
-        RequestsContextManager.loadContext(resourceContext);
-        MDC.put(MDC_NAME_ACTION, "createMetrics");
         LOGGER.debug("Start reporting metric data...");
 
-        BlMetricReportRequest blCreateRequest = MetricReportConverter.apiToBl(request);
-
-        ReportMetricCmd cmd = new ReportMetricCmd(blCreateRequest, index);
-        cmd.execute();
+        ReportMetricsCmdRunnable worker = new ReportMetricsCmdRunnable(request, index);
+        ReportMetricsCmdExecutor.getInstance().execute(worker);
 
         ServiceEmptyResponse retVal = new ServiceEmptyResponse();
+        asyncResponse.resume(retVal);
 
         LOGGER.debug("Finished reporting metric data");
         return retVal;
-
     }
 
     @POST
     @Path("/query")
     public ServiceResponseItems getMetricsStatistics(@Valid ApiMetricStatisticsRequest request,
-                                                     @OverriddenIndexValidation @QueryParam("index") String index) throws IOException {
+                                                     @OverriddenIndexValidation @QueryParam("index") String index) {
         LOGGER.debug("Start fetching metric statistics...");
 
         BlMetricStatisticsRequest req = MetricStatisticConverter.toBl(request);
@@ -85,12 +73,16 @@ public class MetricsResource {
         BlMetricStatisticsResponse response = cmd.execute(req, index);
 
         ServiceResponseItems retVal = new ServiceResponseItems(KIND_GET_STATISTICS);
+
         if (response != null && response.isEmpty() == false) {
             ApiMetricStatisticsResponse resp = MetricReportConverter.blToApi(response);
             retVal.add(resp);
+            LOGGER.debug("Finished fetching metric statistics");
+        }
+        else {
+            LOGGER.warn("Failed to get metric statistics");
         }
 
-        LOGGER.debug("Finished fetching metric statistics");
         return retVal;
     }
 }

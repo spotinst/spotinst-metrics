@@ -14,22 +14,6 @@ public class CommonConverter extends BaseConverter {
 
     CommonConverter() {}
 
-    // region toApi
-    // endregion
-
-    // region toBl
-    // endregion
-
-    // region toDb
-    // endregion
-
-
-    // region Register Converters
-    // endregion
-
-    // region Register Mappings
-    // endregion
-
     // Mapping Registration
     @Override
     protected String entityType() {

@@ -2,7 +2,11 @@ package com.spotinst.metrics.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiMetricStatistics {
@@ -15,43 +19,4 @@ public class ApiMetricStatistics {
     public ApiMetricStatistics() {
     }
 
-    public Double getCount() {
-        return count;
-    }
-
-    public void setCount(Double count) {
-        this.count = count;
-    }
-
-    public Double getSum() {
-        return sum;
-    }
-
-    public void setSum(Double sum) {
-        this.sum = sum;
-    }
-
-    public Double getAverage() {
-        return average;
-    }
-
-    public void setAverage(Double average) {
-        this.average = average;
-    }
-
-    public Double getMinimum() {
-        return minimum;
-    }
-
-    public void setMinimum(Double minimum) {
-        this.minimum = minimum;
-    }
-
-    public Double getMaximum() {
-        return maximum;
-    }
-
-    public void setMaximum(Double maximum) {
-        this.maximum = maximum;
-    }
 }

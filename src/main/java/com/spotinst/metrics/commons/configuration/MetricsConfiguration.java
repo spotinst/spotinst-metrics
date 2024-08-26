@@ -8,8 +8,13 @@ import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 public class MetricsConfiguration extends BaseApplicationConfiguration {
+    //region Getters and Setters
     //region Members
     @Valid
     @NotNull
@@ -36,64 +41,16 @@ public class MetricsConfiguration extends BaseApplicationConfiguration {
     @NotNull
     @JsonProperty("swagger")
     public SwaggerBundleConfiguration swaggerBundleConfiguration;
-    //endregion
 
-    //region Getters and Setters
-    public ServicesConfig getServices() {
-        return services;
-    }
+    @Valid
+    @NotNull
+    private IndexConfig indexConfig;
 
-    public void setServices(ServicesConfig services) {
-        this.services = services;
-    }
+    @Valid
+    @NotNull
+    private MetadataCacheConfig metadataCache;
 
-    public DbOrganizationMappingConfiguration getDbMapping() {
-        return dbMapping;
-    }
 
-    public void setDbMapping(DbOrganizationMappingConfiguration dbMapping) {
-        this.dbMapping = dbMapping;
-    }
-
-    public RateLimitConfig getRateLimit() {
-        return rateLimit;
-    }
-
-    public void setRateLimit(RateLimitConfig rateLimit) {
-        this.rateLimit = rateLimit;
-    }
-
-    public RedisConfig getRedisConfiguration() {
-        return redisConfiguration;
-    }
-
-    public void setRedisConfiguration(RedisConfig redisConfiguration) {
-        this.redisConfiguration = redisConfiguration;
-    }
-
-    public ElasticConfig getElastic() {
-        return elastic;
-    }
-
-    public void setElastic(ElasticConfig elastic) {
-        this.elastic = elastic;
-    }
-
-    public QueryConfig getQueryConfig() {
-        return queryConfig;
-    }
-
-    public void setQueryConfig(QueryConfig queryConfig) {
-        this.queryConfig = queryConfig;
-    }
-
-    public SwaggerBundleConfiguration getSwaggerBundleConfiguration() {
-        return swaggerBundleConfiguration;
-    }
-
-    public void setSwaggerBundleConfiguration(SwaggerBundleConfiguration swaggerBundleConfiguration) {
-        this.swaggerBundleConfiguration = swaggerBundleConfiguration;
-    }
     //endregion
 
 }

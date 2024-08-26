@@ -1,4 +1,4 @@
-package com.spotinst.metrics.bl.cmds;
+package com.spotinst.metrics.bl.cmds.metric;
 
 import com.spotinst.commons.cmd.BaseCmd;
 import com.spotinst.dropwizard.bl.repo.RepoGenericResponse;
@@ -6,7 +6,6 @@ import com.spotinst.dropwizard.common.exceptions.bl.BlException;
 import com.spotinst.metrics.MetricsAppContext;
 import com.spotinst.metrics.bl.errors.ErrorCodes;
 import com.spotinst.metrics.bl.model.BlMetricDateRange;
-import com.spotinst.metrics.bl.model.BlMetricStatistics;
 import com.spotinst.metrics.bl.model.BlMetricStatisticsRequest;
 import com.spotinst.metrics.bl.model.responses.BlMetricStatisticsResponse;
 import com.spotinst.metrics.bl.repos.MetricsRepoManager;
@@ -17,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class GetMetricsStatisticsCmd extends BaseCmd<BlMetricStatisticsResponse> {

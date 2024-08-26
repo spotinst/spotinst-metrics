@@ -1,5 +1,6 @@
 package com.spotinst.metrics.commons.enums;
 
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import static java.util.concurrent.TimeUnit.HOURS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
+@Getter
 public enum MetricsTimeIntervalEnum {
     ONE_MINUTE("1m", 1, MINUTES),
     TWO_MINUTES("2m", 2, MINUTES),
@@ -41,18 +43,6 @@ public enum MetricsTimeIntervalEnum {
         this.name = name;
         this.offset = offset;
         this.timeUnit = timeUnit;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public TimeUnit getTimeUnit() {
-        return timeUnit;
-    }
-
-    public Integer getOffset() {
-        return offset;
     }
 
     /**

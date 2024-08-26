@@ -1,5 +1,6 @@
 package com.spotinst.metrics.commons.enums;
 
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,6 +10,7 @@ import java.util.Map;
 /**
  * Created by zachi.nachshon on 2/8/17.
  */
+@Getter
 public enum MetricStatisticEnum {
     AVERAGE("average", "avg"),
     COUNT("count", "count"),
@@ -70,11 +72,4 @@ public enum MetricStatisticEnum {
         return retVal;
     }
 
-    public String getValue() {
-        return value;
-    }
-
-    public String getShortenValue() {
-        return shortenValue;
-    }
 }

@@ -21,11 +21,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class MetricStatisticConverter {
-//    public static BlMetricStatisticsRequest toBl(ApiMetricStatisticsRequest request) {
-//        BlMetricStatisticsRequest result =
-//                EntitiesMapper.instance.mapType(request, BlMetricStatisticsRequest.class);
-//        return result;
-//    }
 
     public static BlMetricStatisticsRequest toBl(ApiMetricStatisticsRequest request) {
         BlMetricStatisticsRequest retVal = new BlMetricStatisticsRequest();
