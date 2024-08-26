@@ -29,8 +29,12 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 
+import static com.spotinst.metrics.commons.utils.EsIndexNamingUtils.generateIndicesByDateRange;
+
 public class ElasticSearchService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchService.class);
+
+    private static final String DEFAULT_DOC_TYPE = "balancer";
 
     public static EsMetricReportResponse reportMetrics(List<ElasticMetricDocument> esMetricDocuments,
                                                        String index) throws DalException {
@@ -73,10 +77,8 @@ public class ElasticSearchService {
 
         try {
             ElasticMetricDateRange dateRange = request.getDateRange();
-            //            String[]               indices      = generateIndicesByDateRange(dateRange, index);
-            //            String                 indicesNames = logIndicesNames(indices);
-            String[] indices = new String[1];
-            indices[0] = index;
+            String[]               indices      = generateIndicesByDateRange(dateRange, index);
+            String                 indicesNames = logIndicesNames(indices);
 
             IndicesOptions options = IndicesOptions.fromOptions(true, true, true, false);
             // New way using RestHighLevelClient
@@ -97,8 +99,8 @@ public class ElasticSearchService {
             StopWatch sw = new StopWatch();
             sw.start();
             sw.stop();
-            //            LOGGER.info(String.format("Elastic search query on indices [%s] on type [%s] took [%s]ms", indicesNames,
-            //                                                  DEFAULT_DOC_TYPE, sw.totalTime().millis()));
+            LOGGER.info(String.format("Elastic search query on indices [%s] on type [%s] took [%s]ms", indicesNames,
+                                                  DEFAULT_DOC_TYPE, sw.totalTime().millis()));
 
             // Parse elastic search response
             retVal = manager.parseResponse(searchResponse);
@@ -112,6 +114,20 @@ public class ElasticSearchService {
         }
 
         LOGGER.debug("Finished fetching metrics statistics by request filter");
+
+        return retVal;
+    }
+
+    private static String logIndicesNames(String[] indices) {
+        StringBuilder sb = new StringBuilder();
+        if(indices != null && indices.length > 0) {
+            for(String idx : indices) {
+                sb.append(idx).append(", ");
+            }
+        }
+
+        String retVal = sb.toString();
+        LOGGER.debug(String.format("Starting to fetch metrics statistics from indices [%s]...", retVal));
 
         return retVal;
     }

@@ -22,7 +22,8 @@ public class EsIndexNamingUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(EsIndexNamingUtils.class);
 
     // Index name format
-    private static final String DATED_INDEX_NAME_FORMAT = "metrics-%s";
+//    private static final String DATED_INDEX_NAME_FORMAT = "metrics-%s";
+    private static final String DATED_INDEX_NAME_FORMAT = "%s";
     private static final String INDEX_TIME_PATTERN      = "yyyy.MM.dd";
 
     // Index name patterns for read/write actions
