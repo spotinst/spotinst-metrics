@@ -3,6 +3,7 @@ package com.spotinst.metrics;
 import com.spotinst.dropwizard.common.context.BaseAppContext;
 import com.spotinst.metrics.bl.model.BlOrganization;
 import com.spotinst.metrics.commons.configuration.MetricsConfiguration;
+import com.spotinst.metrics.dal.services.elastic.infra.ElasticSearchService;
 import com.spotinst.metrics.dal.services.elastic.infra.IElasticSearchService;
 import org.elasticsearch.client.RestHighLevelClient;
 
@@ -35,6 +36,15 @@ public class MetricsAppContext extends BaseAppContext<MetricsConfiguration, BlOr
 
     //endregion
 
+    // Method to get the ElasticSearchService
+    public IElasticSearchService getElasticSearchService() {
+        if (elasticSearchService == null) {
+            // Initialize the elasticSearchService here
+            elasticSearchService = new ElasticSearchService(); // Ensure this is a valid instance
+        }
+        return elasticSearchService;
+    }
+
     //region Getters and Setters
 
     @Override
@@ -55,9 +65,9 @@ public class MetricsAppContext extends BaseAppContext<MetricsConfiguration, BlOr
         this.elasticClient = elasticClient;
     }
 
-    public IElasticSearchService getElasticSearchService() {
-        return elasticSearchService;
-    }
+//    public IElasticSearchService getElasticSearchService() {
+//        return elasticSearchService;
+//    }
 
     public void setElasticSearchService(IElasticSearchService elasticSearchService) {
         this.elasticSearchService = elasticSearchService;
