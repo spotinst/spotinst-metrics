@@ -41,8 +41,10 @@ public class RawIndexManager extends BaseIndexManager<ElasticMetricStatisticsReq
         IS_READ_FROM_OPTIMIZED_INDEX = false;
 
         IndexNamePatterns indexNamePatterns = config.getIndexNamePatterns();
+
         if(indexNamePatterns != null) {
             String readPattern = indexNamePatterns.getReadPattern();
+
             if(readPattern != null) {
                 String idxPrefix = StringUtils.isEmpty(readPattern) ? "" : readPattern;
                 IS_READ_FROM_OPTIMIZED_INDEX = idxPrefix.startsWith("opt_");

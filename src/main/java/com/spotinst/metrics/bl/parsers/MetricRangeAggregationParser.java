@@ -53,6 +53,7 @@ public class MetricRangeAggregationParser extends BaseMetricAggregationParser<El
             Aggregations aggs    = aggsMapByKeys.get(compositeKey);
 
             InternalRange internalRange = aggs.get(aggregationName);
+
             if (internalRange == null) {
                 String msg =
                         "Cannot get elastic search internal range buckets for [%s], skipping to the next aggregation level/sibling";
@@ -64,9 +65,11 @@ public class MetricRangeAggregationParser extends BaseMetricAggregationParser<El
 
             // This is the metric we're going to break into smaller sequential range groups for this iteration
             ElasticMetricAggregations iterationMetricSequence;
+
             if(workingMap.containsKey(termKey)) {
                 iterationMetricSequence = workingMap.get(termKey);
-            } else {
+            }
+            else {
                 iterationMetricSequence = new ElasticMetricAggregations();
             }
 

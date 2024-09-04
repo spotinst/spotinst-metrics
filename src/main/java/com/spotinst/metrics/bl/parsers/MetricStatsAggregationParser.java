@@ -51,6 +51,7 @@ public class MetricStatsAggregationParser extends BaseMetricAggregationParser<El
 
             // Create metric statistics from elastic search response
             ElasticMetricStatistics statistics = statParser.parse(aggs);
+
             if (statistics == null) {
                 String msg = "Cannot get elastic search stats [%s] for time [%s], skipping";
                 LOGGER.debug(String.format(msg, aggregationName, timestampKey));
@@ -62,6 +63,7 @@ public class MetricStatsAggregationParser extends BaseMetricAggregationParser<El
 
                 // When a time interval is used, we need to glue each data point to its relevant time
                 ElasticMetricDatapoint dp = byTimestamp.get(timestampKey);
+
                 if (dp == null) {
                     dp = new ElasticMetricDatapoint();
                 }

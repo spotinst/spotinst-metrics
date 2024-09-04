@@ -1,14 +1,14 @@
 package com.spotinst.metrics.commons.validators;
 
 import com.spotinst.metrics.MetricsAppContext;
+import jakarta.validation.ConstraintValidator;
 import org.apache.commons.lang3.BooleanUtils;
 import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.collections4.CollectionUtils;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidatorContext;
 import java.util.List;
 import java.util.Set;
 

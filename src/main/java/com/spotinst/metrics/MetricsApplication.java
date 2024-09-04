@@ -124,6 +124,7 @@ public class MetricsApplication extends BaseApplication<MetricsConfiguration, To
         loadOrgCmd.execute();
 
         Boolean isOrgLoaded = loadOrgCmd.getResult();
+
         if (isOrgLoaded == false) {
             throw new ApplicationRequirementsException("Failed loading organization at service startup");
         }

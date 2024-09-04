@@ -9,6 +9,7 @@ import com.spotinst.metrics.api.requests.ApiMetricsReportRequest;
 import com.spotinst.metrics.api.responses.ApiMetricStatisticsResponse;
 import com.spotinst.metrics.bl.model.*;
 import com.spotinst.metrics.bl.model.responses.BlMetricStatisticsResponse;
+import com.spotinst.metrics.commons.constants.MetricsConstants;
 import com.spotinst.metrics.dal.models.elastic.ElasticMetric;
 import com.spotinst.metrics.dal.models.elastic.ElasticMetricDocument;
 import com.spotinst.metrics.dal.models.elastic.requests.ElasticMetricReportRequest;
@@ -147,6 +148,7 @@ public class MetricReportConverter {
         for (BlMetric blMetric : metrics){
             ElasticMetric esMetric = new ElasticMetric();
             esMetric.setName(blMetric.getName());
+//            esMetric.setName(blMetric.getName() + MetricsConstants.Dimension.METRIC_KEYWORD);
             esMetric.setCount(blMetric.getCount());
             esMetric.setValue(blMetric.getValue());
             esMetric.setUnit(blMetric.getUnit());

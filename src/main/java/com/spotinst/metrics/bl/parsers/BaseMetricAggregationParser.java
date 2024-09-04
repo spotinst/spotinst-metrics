@@ -69,6 +69,7 @@ public abstract class BaseMetricAggregationParser<T extends ElasticMetricStatist
             datapoints.forEach(d -> {
                 ElasticMetricStatistics newStats  = new ElasticMetricStatistics();
                 ElasticMetricStatistics prevStats = d.getStatistics();
+
                 if(prevStats != null) {
                     newStats.setCount(prevStats.getCount());
                     newStats.setSum(prevStats.getSum());

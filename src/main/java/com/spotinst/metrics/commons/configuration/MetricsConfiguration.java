@@ -8,6 +8,7 @@ import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import org.checkerframework.checker.units.qual.N;
 
 public class MetricsConfiguration extends BaseApplicationConfiguration {
     //region Members
@@ -24,6 +25,10 @@ public class MetricsConfiguration extends BaseApplicationConfiguration {
     @NotNull
     private RedisConfig redisConfiguration;
 
+//    @Valid
+//    @NotNull
+//    private IndexConfig indexConfig;
+
     @Valid
     @NotNull
     private ElasticConfig elastic;
@@ -31,6 +36,10 @@ public class MetricsConfiguration extends BaseApplicationConfiguration {
     @Valid
     @NotNull
     private QueryConfig queryConfig;
+
+//    @Valid
+//    @NotNull
+//    private ElasticSearchConfig elasticsearch;
 
     @Valid
     @NotNull
@@ -70,6 +79,22 @@ public class MetricsConfiguration extends BaseApplicationConfiguration {
     public void setRedisConfiguration(RedisConfig redisConfiguration) {
         this.redisConfiguration = redisConfiguration;
     }
+
+//    public ElasticSearchConfig getElasticsearch() {
+//        return elasticsearch;
+//    }
+
+//    public IndexConfig getIndexConfig() {
+//        return indexConfig;
+//    }
+//
+//    public void setIndexConfig(IndexConfig indexConfig) {
+//        this.indexConfig = indexConfig;
+//    }
+//
+//    public void setElasticsearch(ElasticSearchConfig elasticsearch) {
+//        this.elasticsearch = elasticsearch;
+//    }
 
     public ElasticConfig getElastic() {
         return elastic;

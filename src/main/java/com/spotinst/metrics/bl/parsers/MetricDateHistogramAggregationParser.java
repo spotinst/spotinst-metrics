@@ -41,6 +41,7 @@ public class MetricDateHistogramAggregationParser extends BaseMetricAggregationP
             String metricName = compositeKey.getTermKey();
 
             ParsedDateHistogram histogram = aggs.get(aggregationName);
+
             if (histogram == null) {
                 String msg =
                         "Cannot get elastic search date histogram buckets for [%s], skipping to the next aggregation level/sibling";
@@ -49,12 +50,13 @@ public class MetricDateHistogramAggregationParser extends BaseMetricAggregationP
             }
 
             List<? extends Histogram.Bucket> buckets = histogram.getBuckets();
+
             if (CollectionUtils.isEmpty(buckets) == false) {
                 LOGGER.debug(String.format("Starting to report response objects for DATE HISTOGRAM aggregation for metric value [%s]", metricName));
 
                 List<ElasticMetricDatapoint> newDatapoints = new ArrayList<>();
                 for (Histogram.Bucket bucket : buckets) {
-                    String               dateKey   = bucket.getKey().toString();
+                    String               dateKey   = bucket.getKeyAsString();
                     ElasticMetricAggregations elasticMetricAggregations;
 
                     // Add to the aggregation parsing result map
@@ -81,6 +83,7 @@ public class MetricDateHistogramAggregationParser extends BaseMetricAggregationP
                 }
 
                 ElasticMetricAggregations preAdd;
+
                 if(byRefResultMap.containsKey(metricName)) {
                     preAdd = byRefResultMap.get(metricName);
                     preAdd.setDatapoints(newDatapoints);

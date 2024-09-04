@@ -23,6 +23,7 @@ public class EsIndexNamingUtils {
 
     // Index name format
     private static final String DATED_INDEX_NAME_FORMAT = "metrics-%s";
+//    private static final String DATED_INDEX_NAME_FORMAT = "%s";
     private static final String INDEX_TIME_PATTERN      = "yyyy.MM.dd";
 
     // Index name patterns for read/write actions
@@ -38,18 +39,22 @@ public class EsIndexNamingUtils {
         READ_INDEX_NAME_PATTERN = "%s";
 
         IndexNamePatterns indexNamePatterns = config.getIndexNamePatterns();
+
         if(indexNamePatterns != null) {
             String writePattern = indexNamePatterns.getWritePattern();
+
             if(StringUtils.isEmpty(writePattern) == false) {
                 WRITE_INDEX_NAME_PATTERN = writePattern;
             }
 
             String readPattern = indexNamePatterns.getReadPattern();
+
             if(StringUtils.isEmpty(readPattern) == false) {
                 READ_INDEX_NAME_PATTERN = readPattern;
             }
 
             String aggReadPattern = indexNamePatterns.getAggregationReadPattern();
+
             if(StringUtils.isEmpty(aggReadPattern) == false) {
                 AGG_READ_INDEX_NAME_PATTERN = aggReadPattern;
             }
@@ -69,7 +74,8 @@ public class EsIndexNamingUtils {
 
         if(index == null) {
             useFormat = useWriteIndexPattern ? WRITE_INDEX_NAME_PATTERN : READ_INDEX_NAME_PATTERN;
-        } else {
+        }
+        else {
             useFormat = generateOverriddenIndex(index);
         }
 
@@ -78,8 +84,8 @@ public class EsIndexNamingUtils {
 
         SimpleDateFormat formatter       = new SimpleDateFormat(INDEX_TIME_PATTERN);
         String           formattedDate   = formatter.format(today);
-//        String           idxNameWithDate = String.format(DATED_INDEX_NAME_FORMAT, formattedDate);
-        String           idxNameWithDate = String.format(formattedDate);
+        String           idxNameWithDate = String.format(DATED_INDEX_NAME_FORMAT, formattedDate);
+//        String           idxNameWithDate = String.format(formattedDate);
 
         retVal = String.format(useFormat, idxNameWithDate);
         return retVal;
@@ -89,7 +95,7 @@ public class EsIndexNamingUtils {
         String retVal;
 
         if(index.endsWith("_%s") == false) {
-            index = index + "_%s";
+            index = index + "-%s";
         }
 
         retVal = index;
@@ -117,7 +123,8 @@ public class EsIndexNamingUtils {
 
             if(index == null) {
                 readIndexPattern = useAggregationIndex ? AGG_READ_INDEX_NAME_PATTERN : READ_INDEX_NAME_PATTERN;
-            } else {
+            }
+            else {
                 readIndexPattern = generateOverriddenIndex(index);
             }
 
