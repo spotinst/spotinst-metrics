@@ -136,9 +136,9 @@ public class MetricsApplication extends BaseApplication<MetricsConfiguration, To
         MetricsConfiguration configuration = MetricsAppContext.getInstance().getConfiguration();
         ElasticConfig        elastic       = configuration.getElastic();
 
-        String  clusterScheme     = elastic.getClusterScheme();
-        String  clusterHost       = elastic.getClusterHost();
-        Integer clusterPort       = elastic.getClusterPort();
+        String  clusterScheme     = elastic.getScheme();
+        String  clusterHost       = elastic.getHost();
+        Integer clusterPort       = elastic.getPort();
         Integer connectionTimeout = elastic.getConnectionTimeout();
         Integer socketTimeout     = elastic.getSocketTimeout();
 

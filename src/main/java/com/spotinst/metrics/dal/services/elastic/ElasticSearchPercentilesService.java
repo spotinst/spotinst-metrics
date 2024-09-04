@@ -12,7 +12,7 @@
 //import com.spotinst.metrics.dal.models.elastic.responses.ElasticDimensionsValuesResponse;
 //import com.spotinst.metrics.dal.models.elastic.responses.ElasticMetricStatisticsResponse;
 ////import com.spotinst.metrics.dal.models.elastic.responses.ElasticPercentilesResponse;
-//import com.spotinst.metrics.dal.models.elastic.responses.EsMetricReportResponse;
+//import com.spotinst.metrics.dal.models.elastic.responses.ElasticMetricReportResponse;
 //import com.spotinst.metrics.dal.services.elastic.infra.BaseElasticSearchService;
 //import com.spotinst.dropwizard.common.exceptions.bl.BlException;
 //import com.spotinst.dropwizard.common.exceptions.dal.DalException;
@@ -325,7 +325,7 @@
 //    }
 //
 //    @Override
-//    public EsMetricReportResponse reportMetrics(List<ElasticMetricDocument> esMetricDocuments,
+//    public ElasticMetricReportResponse reportMetrics(List<ElasticMetricDocument> esMetricDocuments,
 //                                                String index) throws DalException {
 //        throw new NotImplementedException(String.format(NOT_IMPLEMENTED_MSG_FORMAT, "reportMetrics"));
 //    }

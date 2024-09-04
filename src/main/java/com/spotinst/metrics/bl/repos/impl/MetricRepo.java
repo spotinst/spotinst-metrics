@@ -7,7 +7,6 @@ import com.spotinst.dropwizard.common.exceptions.dal.DalException;
 import com.spotinst.metrics.MetricsAppContext;
 import com.spotinst.metrics.bl.model.BlMetricReportRequest;
 import com.spotinst.metrics.bl.model.BlMetricStatisticsRequest;
-import com.spotinst.metrics.bl.model.responses.BlMetricReportResponse;
 import com.spotinst.metrics.bl.model.responses.BlMetricStatisticsResponse;
 import com.spotinst.metrics.bl.repos.interfaces.IMetricRepo;
 //import com.spotinst.metrics.commons.converters.DimensionsValuesConverter;
@@ -16,8 +15,8 @@ import com.spotinst.metrics.commons.converters.MetricStatisticConverter;
 import com.spotinst.metrics.dal.models.elastic.ElasticMetricDocument;
 import com.spotinst.metrics.dal.models.elastic.requests.ElasticMetricReportRequest;
 import com.spotinst.metrics.dal.models.elastic.requests.ElasticMetricStatisticsRequest;
+import com.spotinst.metrics.dal.models.elastic.responses.ElasticMetricReportResponse;
 import com.spotinst.metrics.dal.models.elastic.responses.ElasticMetricStatisticsResponse;
-import com.spotinst.metrics.dal.models.elastic.responses.EsMetricReportResponse;
 import com.spotinst.metrics.dal.services.elastic.infra.IElasticSearchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,9 +45,9 @@ public class MetricRepo implements IMetricRepo {
 
     //region Override Methods
     @Override
-    public RepoGenericResponse<EsMetricReportResponse> report(BlMetricReportRequest request, String index) {
-        RepoGenericResponse<EsMetricReportResponse> retVal;
-        List<ElasticMetricDocument>                 dalMetrics = new ArrayList<>();
+    public RepoGenericResponse<ElasticMetricReportResponse> report(BlMetricReportRequest request, String index) {
+        RepoGenericResponse<ElasticMetricReportResponse> retVal;
+        List<ElasticMetricDocument>                      dalMetrics = new ArrayList<>();
 
         try { //TODO Tal: I can remove this try and catch
             ElasticMetricReportRequest esMetricReportRequest = MetricReportConverter.toEs(request);
@@ -61,7 +60,7 @@ public class MetricRepo implements IMetricRepo {
         }
 
         try {
-            EsMetricReportResponse esMetricResponse = elasticService.reportMetrics(dalMetrics, index);
+            ElasticMetricReportResponse esMetricResponse = elasticService.reportMetrics(dalMetrics, index);
 //            BlMetricReportResponse blMetricResponse = MetricReportConverter.esToBl(esMetricResponse);
 
             retVal = new RepoGenericResponse<>(esMetricResponse);

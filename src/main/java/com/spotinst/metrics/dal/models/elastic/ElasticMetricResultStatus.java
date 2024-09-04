@@ -3,11 +3,11 @@ package com.spotinst.metrics.dal.models.elastic;
 /**
  * Created by zachi.nachshon on 1/18/17.
  */
-public class EsMetricResultStatus {
+public class ElasticMetricResultStatus {
     private Integer code;
     private String  name;
 
-    public EsMetricResultStatus() {
+    public ElasticMetricResultStatus() {
     }
 
     public Integer getCode() {

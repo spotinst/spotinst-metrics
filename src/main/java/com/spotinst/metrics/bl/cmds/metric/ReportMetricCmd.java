@@ -4,13 +4,12 @@ import com.spotinst.commons.errors.ErrorCodesCommon;
 import com.spotinst.dropwizard.bl.repo.RepoGenericResponse;
 import com.spotinst.dropwizard.common.context.RequestsContextManager;
 import com.spotinst.dropwizard.common.exceptions.bl.BlException;
-import com.spotinst.metrics.bl.cmds.metadata.UpdateMetricMetadataCacheRunnable;
 import com.spotinst.metrics.bl.model.BlMetricDocument;
 import com.spotinst.metrics.bl.model.BlMetricReportRequest;
 import com.spotinst.metrics.bl.model.responses.BlMetricReportResponse;
 import com.spotinst.metrics.bl.repos.MetricsRepoManager;
 //import com.spotinst.metrics.commons.threadpool.UpdateMetricMetadataCacheExecutor;
-import com.spotinst.metrics.dal.models.elastic.responses.EsMetricReportResponse;
+import com.spotinst.metrics.dal.models.elastic.responses.ElasticMetricReportResponse;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -38,7 +37,7 @@ public class ReportMetricCmd {
                 metricDocuments.forEach(doc -> doc.setAccountId(accountId));
             }
 
-            RepoGenericResponse<EsMetricReportResponse> reportResponse =
+            RepoGenericResponse<ElasticMetricReportResponse> reportResponse =
                     MetricsRepoManager.metricRepo.report(blRequest, index);
 
             if (reportResponse.isRequestSucceed() || reportResponse.getValue() != null) {

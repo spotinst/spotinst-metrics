@@ -3,7 +3,7 @@ package com.spotinst.metrics.commons.converters;
 import com.spotinst.commons.converters.BaseConverter;
 import com.spotinst.commons.mapper.entities.EntitiesMapper;
 import com.spotinst.metrics.bl.model.responses.BlMetricReportResponse;
-import com.spotinst.metrics.dal.models.elastic.responses.EsMetricReportResponse;
+import com.spotinst.metrics.dal.models.elastic.responses.ElasticMetricReportResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +26,7 @@ public class CommonConverter extends BaseConverter {
     // region toDb
     // endregion
 
-    public static BlMetricReportResponse esToBl(EsMetricReportResponse response){
+    public static BlMetricReportResponse esToBl(ElasticMetricReportResponse response){
         BlMetricReportResponse retVal = EntitiesMapper.instance.mapType(response, BlMetricReportResponse.class);
         return retVal;
     }

@@ -25,21 +25,21 @@ public class LoadOrganizationsCmd extends BaseCmd<Boolean> {
         LOGGER.info("Loading Organizations...");
 
         Boolean                                   retVal                = false;
-        RepoGenericResponse<List<BlOrganization>> organizationsResponse = MetricsRepoManager.Organization.getAll(null);
-
-        if (organizationsResponse.isRequestSucceed() && organizationsResponse.getValue().size() > 0) {
-
-            int    organizationsAmount = organizationsResponse.getValue().size();
-            String format              = "Loaded [%s] organizations from database into application cache";
-            String msg                 = String.format(format, organizationsAmount);
-            LOGGER.info(msg);
-
-            Map<BigInteger, BlOrganization> organizationMap = organizationsResponse.getValue().stream().collect(
-                    Collectors.toMap(BlOrganization::getId, Function.identity()));
-            MetricsAppContext.getInstance().setOrganizations(organizationMap);
-            retVal = true;
-        }
-
+//        RepoGenericResponse<List<BlOrganization>> organizationsResponse = MetricsRepoManager.Organization.getAll(null);
+//
+//        if (organizationsResponse.isRequestSucceed() && organizationsResponse.getValue().size() > 0) {
+//
+//            int    organizationsAmount = organizationsResponse.getValue().size();
+//            String format              = "Loaded [%s] organizations from database into application cache";
+//            String msg                 = String.format(format, organizationsAmount);
+//            LOGGER.info(msg);
+//
+//            Map<BigInteger, BlOrganization> organizationMap = organizationsResponse.getValue().stream().collect(
+//                    Collectors.toMap(BlOrganization::getId, Function.identity()));
+//            MetricsAppContext.getInstance().setOrganizations(organizationMap);
+//            retVal = true;
+//        }
+        retVal = true;
         setResult(retVal);
     }
 }

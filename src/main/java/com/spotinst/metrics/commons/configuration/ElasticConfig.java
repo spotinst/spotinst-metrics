@@ -2,6 +2,10 @@ package com.spotinst.metrics.commons.configuration;
 
 import lombok.Data;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 /**
@@ -11,56 +15,32 @@ import java.util.Set;
 @Data
 public class ElasticConfig {
     //region Members
-    private String  clusterScheme;
-    private String  clusterHost;
-    private Integer clusterPort;
+    private String  scheme;
     private Integer connectionTimeout;
     private Integer socketTimeout;
-    private String  awsInterruptionRiskIndexName;
-    private String  awsVersionInterruptionRiskIndexName;
-    private String  awsInterruptionIndexName;
-    private String  awsMarketUsageIndexName;
-    private String  awsOrgMarketUsageIndexName;
-    private String  awsMarketDailyAverageSpotPriceIndexName;
-    private String  awsMarketSavingsIndexName;
-    private String  awsAzZoneIdMappingIndexName;
-    private String  awsMarketSpotPriceIndexName;
-    private String  awsReplacementIndexName;
-    private String  awsRIUtilStatisticsIndexName;
-    private String  awsNfuRIUtilStatisticsIndexName;
-    private String  awsSPUtilStatisticsIndexName;
-    private String  awsRebalanceRecommendationIndexName;
-    private String  azureInterruptionIndexName;
-    private String  azureMarketUsageIndexName;
-    private String  azureMarketEvictionRateIndexName;
-    private String  gcpInterruptionIndexName;
-    private String  azureMarketScoreIndexName;
-    private String  azureMarketLaunchScoreResultIndexName;
-    private String  azurePredictiveReplacementIndexName;
-    private String  azureInDangerMarketIndexName;
-    private String  azureTerminatedInstanceIndexName;
-    private String  azureMissedInterruptionIndexName;
     private String  clusterRegion;
     private IndexNamePatterns indexNamePatterns;
     private Set<String> indexNameOverriddenPatterns;
 
+    @NotNull
+    private String host;
+
+    @NotNull
+    @Max(65535)
+    @Min(1024)
+    private Integer port;
+
+    @NotNull
+    private String clusterName;
+
+    private Boolean           transportSniff;
+    private Integer           pingTimeout;
+
+    @Valid
+    @NotNull
+    private BulkProcessorIndexerConfig bulkProcessorIndexer;
+
     public ElasticConfig() {
-    }
-
-    public IndexNamePatterns getIndexNamePatterns() {
-        return indexNamePatterns;
-    }
-
-    public void setIndexNamePatterns(IndexNamePatterns indexNamePatterns) {
-        this.indexNamePatterns = indexNamePatterns;
-    }
-
-    public Set<String> getIndexNameOverriddenPatterns() {
-        return indexNameOverriddenPatterns;
-    }
-
-    public void setIndexNameOverriddenPatterns(Set<String> indexNameOverriddenPatterns) {
-        this.indexNameOverriddenPatterns = indexNameOverriddenPatterns;
     }
 
     //endregion
