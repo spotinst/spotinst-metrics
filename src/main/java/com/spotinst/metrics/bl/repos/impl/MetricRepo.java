@@ -5,16 +5,20 @@ import com.spotinst.dropwizard.common.exceptions.ExceptionHelper;
 import com.spotinst.dropwizard.common.exceptions.bl.BlException;
 import com.spotinst.dropwizard.common.exceptions.dal.DalException;
 import com.spotinst.metrics.MetricsAppContext;
+import com.spotinst.metrics.bl.model.BlDimensionsValuesRequest;
 import com.spotinst.metrics.bl.model.BlMetricReportRequest;
 import com.spotinst.metrics.bl.model.BlMetricStatisticsRequest;
+import com.spotinst.metrics.bl.model.responses.BlDimensionsValuesResponse;
 import com.spotinst.metrics.bl.model.responses.BlMetricStatisticsResponse;
 import com.spotinst.metrics.bl.repos.interfaces.IMetricRepo;
-//import com.spotinst.metrics.commons.converters.DimensionsValuesConverter;
+import com.spotinst.metrics.commons.converters.DimensionsValuesConverter;
 import com.spotinst.metrics.commons.converters.MetricReportConverter;
 import com.spotinst.metrics.commons.converters.MetricStatisticConverter;
 import com.spotinst.metrics.dal.models.elastic.ElasticMetricDocument;
+import com.spotinst.metrics.dal.models.elastic.requests.ElasticDimensionsValuesRequest;
 import com.spotinst.metrics.dal.models.elastic.requests.ElasticMetricReportRequest;
 import com.spotinst.metrics.dal.models.elastic.requests.ElasticMetricStatisticsRequest;
+import com.spotinst.metrics.dal.models.elastic.responses.ElasticDimensionsValuesResponse;
 import com.spotinst.metrics.dal.models.elastic.responses.ElasticMetricReportResponse;
 import com.spotinst.metrics.dal.models.elastic.responses.ElasticMetricStatisticsResponse;
 import com.spotinst.metrics.dal.services.elastic.infra.IElasticSearchService;
@@ -93,23 +97,23 @@ public class MetricRepo implements IMetricRepo {
         return retVal;
     }
 
-//    @Override
-//    public RepoGenericResponse<BlDimensionsValuesResponse> getDimensionsValues(BlDimensionsValuesRequest request,
-//                                                                               String index) {
-//        RepoGenericResponse<BlDimensionsValuesResponse> retVal;
-//
-//        try {
-//            ElasticDimensionsValuesRequest elasticGetMetricStatsRequest = DimensionsValuesConverter.toEs(request);
-//            ElasticDimensionsValuesResponse elasticMetricResp =
-//                    elasticService.getDimensionsValues(elasticGetMetricStatsRequest, index);
-//
-//            BlDimensionsValuesResponse blMetricResp = DimensionsValuesConverter.toBl(elasticMetricResp);
-//            retVal = new RepoGenericResponse<>(blMetricResp);
-//        }
-//        catch (DalException ex) {
-//            retVal = ExceptionHelper.handleDalException(ex);
-//        }
-//
-//        return retVal;
-//    }
+    @Override
+    public RepoGenericResponse<BlDimensionsValuesResponse> getDimensionsValues(BlDimensionsValuesRequest request,
+                                                                               String index) {
+        RepoGenericResponse<BlDimensionsValuesResponse> retVal;
+
+        try {
+            ElasticDimensionsValuesRequest elasticGetMetricStatsRequest = DimensionsValuesConverter.toEs(request);
+            ElasticDimensionsValuesResponse elasticMetricResp =
+                    elasticService.getDimensionsValues(elasticGetMetricStatsRequest, index);
+
+            BlDimensionsValuesResponse blMetricResp = DimensionsValuesConverter.toBl(elasticMetricResp);
+            retVal = new RepoGenericResponse<>(blMetricResp);
+        }
+        catch (DalException ex) {
+            retVal = ExceptionHelper.handleDalException(ex);
+        }
+
+        return retVal;
+    }
 }

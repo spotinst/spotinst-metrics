@@ -96,11 +96,6 @@ public abstract class BaseIndexManager<T extends ElasticMetricStatisticsRequest>
         boolQuery.filter(timeQuery);
         sourceBuilder.query(boolQuery);
 
-        //        srb.setQuery(boolQuery);
-//
-//        // Queries should use the request cache if possible
-//        srb.setRequestCache(true);
-
         // Do not return documents, we care about the aggregation content
         sourceBuilder.size(0);
     }

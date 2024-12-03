@@ -47,7 +47,7 @@ public class RawIndexManager extends BaseIndexManager<ElasticMetricStatisticsReq
 
             if(readPattern != null) {
                 String idxPrefix = StringUtils.isEmpty(readPattern) ? "" : readPattern;
-                IS_READ_FROM_OPTIMIZED_INDEX = idxPrefix.startsWith("opt_");
+//                IS_READ_FROM_OPTIMIZED_INDEX = idxPrefix.startsWith("opt_"); //TODO Tal: handle it later
             }
         }
     }
@@ -102,9 +102,9 @@ public class RawIndexManager extends BaseIndexManager<ElasticMetricStatisticsReq
         String dimensionPath = String.format(DIMENSION_FIELD_PATH_FORMAT, dimension);
 
         // If reading from a non-optimized index, we still need to append the .keyword suffix
-        if(IS_READ_FROM_OPTIMIZED_INDEX == false) {
-            dimensionPath += METRIC_KEYWORD_SUFFIX;
-        }
+//        if(IS_READ_FROM_OPTIMIZED_INDEX == false) {
+//            dimensionPath += METRIC_KEYWORD_SUFFIX;
+//        }
         return dimensionPath;
     }
     // endregion

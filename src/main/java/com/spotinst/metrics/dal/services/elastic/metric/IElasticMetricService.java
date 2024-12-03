@@ -2,7 +2,9 @@ package com.spotinst.metrics.dal.services.elastic.metric;
 
 import com.spotinst.dropwizard.common.exceptions.dal.DalException;
 import com.spotinst.metrics.dal.models.elastic.ElasticMetricDocument;
+import com.spotinst.metrics.dal.models.elastic.requests.ElasticDimensionsValuesRequest;
 import com.spotinst.metrics.dal.models.elastic.requests.ElasticMetricStatisticsRequest;
+import com.spotinst.metrics.dal.models.elastic.responses.ElasticDimensionsValuesResponse;
 import com.spotinst.metrics.dal.models.elastic.responses.ElasticMetricStatisticsResponse;
 import com.spotinst.metrics.dal.models.elastic.responses.ElasticMetricReportResponse;
 
@@ -13,4 +15,6 @@ public interface IElasticMetricService {
 
     ElasticMetricStatisticsResponse getMetricsStatistics(ElasticMetricStatisticsRequest esMetricStatisticsRequest,
                                                          String index) throws DalException;
+
+    ElasticDimensionsValuesResponse getDimensionsValues(ElasticDimensionsValuesRequest request, String index) throws DalException;
 }

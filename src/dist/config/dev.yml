@@ -23,37 +23,49 @@ services:
 #                ELASTIC
 ##############################################
 elastic:
-  clusterScheme: https
-  clusterHost: vpc-es-aws-statistics-dev-cl2wtyjjsmb67aia2teaama6eq.us-east-2.es.amazonaws.com
-  clusterPort: 443
+  scheme: https
+  host: vpc-es-aws-statistics-dev-cl2wtyjjsmb67aia2teaama6eq.us-east-2.es.amazonaws.com
+  port: 443
   # Values in ms
   connectionTimeout: 3000
   socketTimeout: 90000
-  awsInterruptionRiskIndexName: aws-markets-interruption-risk
-  awsVersionInterruptionRiskIndexName: aws-version-markets-interruption-risk
-  awsInterruptionIndexName: aws-ec2-spot-interruption
-  awsMarketUsageIndexName: aws-markets-usage
-  awsOrgMarketUsageIndexName: aws-org-markets-usage
-  awsMarketSavingsIndexName: aws-markets-savings
-  awsAzZoneIdMappingIndexName: aws-az-zone-id-mapping
-  awsMarketSpotPriceIndexName: aws-markets-spot-price
-  awsMarketDailyAverageSpotPriceIndexName: aws-markets-daily-average-spot-price
-  awsReplacementIndexName: aws-ec2-replacement
-  awsRIUtilStatisticsIndexName : aws-commitment-ri-utilization
-  awsNfuRIUtilStatisticsIndexName: aws-commitment-nfu-ri-utilization
-  awsSPUtilStatisticsIndexName : aws-commitment-sp-utilization
-  awsRebalanceRecommendationIndexName: aws-rebalance-recommendation
-  azureInterruptionIndexName: azure-compute-spot-interruption
-  azureMarketEvictionRateIndexName: azure-market-eviction-rate
-  azureMarketUsageIndexName: azure-market-usage
-  azureMarketScoreIndexName: azure-market-score
-  azureTerminatedInstanceIndexName: azure-terminated-instance
-  azureMarketLaunchScoreResultIndexName: azure-market-launch-score-result
-  gcpInterruptionIndexName: gcp-compute-preemptible-interruption
-  azureInDangerMarketIndexName: azure-in-danger-market
-  azurePredictiveReplacementIndexName: azure-predictive-replacement
-  azureMissedInterruptionIndexName: azure-missed-interruption
   clusterRegion: us-east-2
+  indexNameOverriddenPatterns: [ "spot_storage", "azure_stateful_opt", "azure_ocean_opt" ]
+
+  indexNamePatterns:
+    # Add an index name pattern to be used by the get statistics requests
+    readPattern: "opt_%s_test"
+
+    # Add an index name pattern to be used by the get aggregative statistics requests
+    aggregationReadPattern: "agg_%s"
+
+    # Add an index name pattern to be used in the report metrics
+    # For optimized index, prefix MUST BE ALIGNED WITH CLUSTER TEMPLATE of 'opt_*'
+    writePattern: "opt_%s_test"
+#    writePattern: "opt_%s"
+
+  bulkProcessorIndexer:
+
+    # Sets when to flush a new bulk request based on the number of actions currently added
+    bufferedActions: 1000
+
+    # Sets when to flush a new bulk request based on the size of actions currently added
+    sizeInMB: 5
+
+    # Sets a flush interval flushing *any* bulk actions pending if the interval passes
+    flushIntervalInSeconds: 5
+
+    # Sets the number of concurrent requests allowed to be executed
+    concurrentRequests: 16
+
+    # Provides a backoff policy for bulk requests for whenever a bulk request is rejected due to resource constraints
+    backoffPolicyConfig:
+
+      # The initial delay defines how long to wait for the first retry attempt
+      initialDelayMs: 100
+
+      # The maximum number of retries. Must be a non-negative number
+      numOfRetries: 3
 
 
 ##############################################

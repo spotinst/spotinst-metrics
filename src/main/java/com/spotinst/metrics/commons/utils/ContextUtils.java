@@ -3,6 +3,7 @@ package com.spotinst.metrics.commons.utils;
 import com.spotinst.dropwizard.common.context.RequestsContextManager;
 import com.spotinst.dropwizard.common.exceptions.bl.BlException;
 import com.spotinst.commons.errors.ErrorCodesCommon;
+import com.spotinst.metrics.bl.model.BlDimensionsValuesRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,11 +21,11 @@ public class ContextUtils {
         request.setAccountId(accountId);
     }
 
-//    public static void setCtxAccountOnRequest(BlDimensionsValuesRequest request) {
-//        String accountId = extractAccountIdFromContext();
-//        request.setAccountId(accountId);
-//    }
-//
+    public static void setCtxAccountOnRequest(BlDimensionsValuesRequest request) {
+        String accountId = extractAccountIdFromContext();
+        request.setAccountId(accountId);
+    }
+
 //    public static void setCtxAccountOnRequest(BlPercentilesRequest request) {
 //        String accountId = extractAccountIdFromContext();
 //        request.setAccountId(accountId);

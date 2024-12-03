@@ -2,13 +2,19 @@ package com.spotinst.metrics.api.resources.app;
 
 import com.spotinst.commons.response.api.ServiceEmptyResponse;
 import com.spotinst.commons.response.api.items.ServiceResponseItems;
+import com.spotinst.metrics.api.requests.ApiDimensionsValuesRequest;
 import com.spotinst.metrics.api.requests.ApiMetricStatisticsRequest;
 import com.spotinst.metrics.api.requests.ApiMetricsReportRequest;
+import com.spotinst.metrics.api.responses.ApiDimensionsValuesResponse;
 import com.spotinst.metrics.api.responses.ApiMetricStatisticsResponse;
+import com.spotinst.metrics.bl.cmds.metric.GetDimensionsValuesCmd;
 import com.spotinst.metrics.bl.cmds.metric.GetMetricsStatisticsCmd;
 import com.spotinst.metrics.bl.cmds.metric.ReportMetricsCmdRunnable;
+import com.spotinst.metrics.bl.model.BlDimensionsValuesRequest;
 import com.spotinst.metrics.bl.model.BlMetricStatisticsRequest;
+import com.spotinst.metrics.bl.model.responses.BlDimensionsValuesResponse;
 import com.spotinst.metrics.bl.model.responses.BlMetricStatisticsResponse;
+import com.spotinst.metrics.commons.converters.DimensionsValuesConverter;
 import com.spotinst.metrics.commons.converters.MetricReportConverter;
 import com.spotinst.metrics.commons.converters.MetricStatisticConverter;
 import com.spotinst.metrics.commons.threadpool.ReportMetricsCmdExecutor;
@@ -26,6 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.validation.Valid;
+
+import java.io.IOException;
 
 import static com.spotinst.metrics.commons.constants.MetricsConstants.Resources.METRICS_RESOURCE_PATH;
 
@@ -88,28 +96,28 @@ public class MetricsResource {
 
         return retVal;
     }
-//
-//    @POST
-//    @Path("/query/dimensions")
-//    public ServiceResponseItems getDimensionsValues(@Valid ApiDimensionsValuesRequest request, @OverriddenIndexValidation @QueryParam("index") String index) throws IOException {
-//        LOGGER.info("Start fetching dimensions values...");
-//
-//        BlDimensionsValuesRequest req = DimensionsValuesConverter.toBl(request);
-//
-//        GetDimensionsValuesCmd     cmd      = new GetDimensionsValuesCmd();
-//        BlDimensionsValuesResponse response = cmd.execute(req, index);
-//
-//        ServiceResponseItems retVal = new ServiceResponseItems(KIND_GET_DIMENSION_VALUES);
-//
-//        if(response != null && response.isEmpty() == false) {
-//            ApiDimensionsValuesResponse resp = DimensionsValuesConverter.toApi(response);
-//            retVal.add(resp);
-//        }
-//
-//        LOGGER.info("Finished fetching dimensions values");
-//        return retVal;
-//    }
-//
+
+    @POST
+    @Path("/query/dimensions")
+    public ServiceResponseItems getDimensionsValues(@Valid ApiDimensionsValuesRequest request, @OverriddenIndexValidation @QueryParam("index") String index) throws IOException {
+        LOGGER.info("Start fetching dimensions values...");
+
+        BlDimensionsValuesRequest req = DimensionsValuesConverter.toBl(request);
+
+        GetDimensionsValuesCmd     cmd      = new GetDimensionsValuesCmd();
+        BlDimensionsValuesResponse response = cmd.execute(req, index);
+
+        ServiceResponseItems retVal = new ServiceResponseItems(KIND_GET_DIMENSION_VALUES);
+
+        if(response != null && response.isEmpty() == false) {
+            ApiDimensionsValuesResponse resp = DimensionsValuesConverter.toApi(response);
+            retVal.add(resp);
+        }
+
+        LOGGER.info("Finished fetching dimensions values");
+        return retVal;
+    }
+
 //    @POST
 //    @Path("/query/percentiles")
 //    public ServiceResponseItems<ApiPercentilesResponse> getPercentiles(@Valid ApiPercentilesRequest request, @OverriddenIndexValidation @QueryParam("index") String index) throws IOException {

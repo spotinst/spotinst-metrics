@@ -209,6 +209,7 @@
 package com.spotinst.metrics.dal.services.elastic.infra;
 
 import com.spotinst.dropwizard.common.exceptions.dal.DalException;
+import com.spotinst.metrics.MetricsAppContext;
 import com.spotinst.metrics.dal.models.elastic.ElasticMetricDocument;
 import com.spotinst.metrics.dal.models.elastic.requests.ElasticDimensionsValuesRequest;
 import com.spotinst.metrics.dal.models.elastic.requests.ElasticMetricStatisticsRequest;
@@ -230,7 +231,8 @@ public class ElasticSearchService extends BaseElasticSearchService {
 
     public ElasticSearchService() {
         super();
-        this.metricService = new ElasticMetricService(restHighLevelClient, bulkProcessor);
+        this.restHighLevelClient = MetricsAppContext.getInstance().getElasticClient();
+        this.metricService = new ElasticMetricService(restHighLevelClient);
     }
 
 //    @Override
@@ -248,12 +250,12 @@ public class ElasticSearchService extends BaseElasticSearchService {
         return metricService.getMetricsStatistics(esMetricStatisticsRequest, index);
     }
 
-//    @Override
-//    public ElasticDimensionsValuesResponse getDimensionsValues(ElasticDimensionsValuesRequest esDimensionsValuesRequest,
-//                                                               String index)
-//            throws DalException {
-//        return metricService.getDimensionsValues(esDimensionsValuesRequest, index);
-//    }
+    @Override
+    public ElasticDimensionsValuesResponse getDimensionsValues(ElasticDimensionsValuesRequest esDimensionsValuesRequest,
+                                                               String index)
+            throws DalException {
+        return metricService.getDimensionsValues(esDimensionsValuesRequest, index);
+    }
 
     @Override
     public ElasticMetricReportResponse reportMetrics(List<ElasticMetricDocument> esMetricDocuments, String index)
