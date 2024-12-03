@@ -1,5 +1,10 @@
 package com.spotinst.metrics.commons.configuration;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class IndexNamePatterns {
     private String readPattern;
     private String writePattern;
@@ -8,28 +13,5 @@ public class IndexNamePatterns {
     public IndexNamePatterns() {
     }
 
-    public String getReadPattern() {
-        return readPattern;
-    }
-
-    public void setReadPattern(String readPattern) {
-        this.readPattern = readPattern;
-    }
-
-    public String getWritePattern() {
-        return writePattern;
-    }
-
-    public void setWritePattern(String writePattern) {
-        this.writePattern = writePattern;
-    }
-
-    public String getAggregationReadPattern() {
-        return aggregationReadPattern;
-    }
-
-    public void setAggregationReadPattern(String aggregationReadPattern) {
-        this.aggregationReadPattern = aggregationReadPattern;
-    }
 }
 

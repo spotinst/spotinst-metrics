@@ -2,18 +2,24 @@ package com.spotinst.metrics.commons.converters;
 
 import com.spotinst.commons.mapper.entities.EntitiesMapper;
 import com.spotinst.dropwizard.common.context.RequestsContextManager;
+import com.spotinst.dropwizard.common.exceptions.bl.BlException;
 import com.spotinst.metrics.api.model.ApiMetric;
 import com.spotinst.metrics.api.model.ApiMetricDimension;
 import com.spotinst.metrics.api.model.ApiMetricDocument;
 import com.spotinst.metrics.api.requests.ApiMetricsReportRequest;
 import com.spotinst.metrics.api.responses.ApiMetricStatisticsResponse;
+import com.spotinst.metrics.bl.errors.ErrorCodes;
 import com.spotinst.metrics.bl.model.*;
+import com.spotinst.metrics.bl.model.responses.BlMetricReportResponse;
 import com.spotinst.metrics.bl.model.responses.BlMetricStatisticsResponse;
 import com.spotinst.metrics.commons.constants.MetricsConstants;
 import com.spotinst.metrics.dal.models.elastic.ElasticMetric;
 import com.spotinst.metrics.dal.models.elastic.ElasticMetricDocument;
 import com.spotinst.metrics.dal.models.elastic.requests.ElasticMetricReportRequest;
+import com.spotinst.metrics.dal.models.elastic.responses.EsMetricReportResponse;
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +28,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class MetricReportConverter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetricReportConverter.class);
     public static BlMetricReportRequest apiToBl(ApiMetricsReportRequest apiRequest) {
         BlMetricReportRequest retVal = new BlMetricReportRequest();
 
@@ -49,7 +56,6 @@ public class MetricReportConverter {
 
         return retVal;
     }
-
 
     private static List<BlMetricDimension> convertDimensionsApiToBl(List<ApiMetricDimension> apiMetricDimensions) {
         List<BlMetricDimension> retVal = new ArrayList<>();
@@ -84,24 +90,16 @@ public class MetricReportConverter {
         return retVal;
     }
 
-//    public static ElasticMetricDocument blToDal(BlMetricDocument blMetricDocument) {
-//        ElasticMetricDocument retVal = new ElasticMetricDocument();
-//
-//        retVal.setMetrics(blMetricDocument.getMetrics());
-//        retVal.setDimensions(blMetricDocument.getDimensions());
-//        retVal.setAccountId(blMetricDocument.getAccountId());
-//        retVal.setNamespace(blMetricDocument.getNamespace());
-//        retVal.setTimestamp(blMetricDocument.getTimestamp());
-//
-//        return retVal;
-//    }
+    public static BlMetricReportResponse esToBl(EsMetricReportResponse response){
+        BlMetricReportResponse retVal = EntitiesMapper.instance.mapType(response, BlMetricReportResponse.class);
+        return retVal;
+    }
 
     public static ElasticMetricReportRequest toEs(BlMetricReportRequest request) {
         ElasticMetricReportRequest retVal = new ElasticMetricReportRequest();
         List<ElasticMetricDocument> esDocumentList = new ArrayList<>();
 
         if (request != null && CollectionUtils.isEmpty(request.getMetricDocuments()) == false) {
-            
             for (BlMetricDocument blDocument : request.getMetricDocuments()){
                 ElasticMetricDocument esDocument = new ElasticMetricDocument();
                 
@@ -128,6 +126,11 @@ public class MetricReportConverter {
                 }
                 esDocumentList.add(esDocument);
             }
+        }
+        else {
+            String errorMessage = "Metrics documents list is null";
+            LOGGER.error(errorMessage);
+            throw new BlException(ErrorCodes.INVALID_REQUEST, errorMessage);
         }
         retVal.setMetricDocuments(esDocumentList);
         return retVal;

@@ -10,14 +10,6 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-/**
- * * Validates that index query param is defined as allowed in the config files
- *
- *
- *  @author Yarden Eisenberg
- *  @since 07/04/2021
- *
- */
 @Documented
 @Constraint(validatedBy = {OverriddenIndexValidator.class})
 @Target({METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE})

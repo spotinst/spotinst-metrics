@@ -2,6 +2,8 @@ package com.spotinst.metrics.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -9,6 +11,8 @@ import java.util.Date;
 /**
  * Created by Tal.Geva on 07/08/2024.
  */
+@Setter
+@Getter
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiMetricDateRange {
@@ -22,19 +26,4 @@ public class ApiMetricDateRange {
     public ApiMetricDateRange() {
     }
 
-    public Date getFrom() {
-        return from;
-    }
-
-    public void setFrom(Date from) {
-        this.from = from;
-    }
-
-    public Date getTo() {
-        return to;
-    }
-
-    public void setTo(Date to) {
-        this.to = to;
-    }
 }

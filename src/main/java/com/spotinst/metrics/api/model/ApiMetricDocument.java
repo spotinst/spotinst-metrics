@@ -1,13 +1,19 @@
 package com.spotinst.metrics.api.model;
 
-import com.spotinst.commons.response.api.items.IServiceResponseItem;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.List;
 
-//TODO Tal: check if IServiceResponseItem necessary and what it means
-public class ApiMetricDocument implements IServiceResponseItem {
+@Setter
+@Getter
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ApiMetricDocument {
     @NotNull
     private String namespace;
 
@@ -21,37 +27,5 @@ public class ApiMetricDocument implements IServiceResponseItem {
     private List<ApiMetric> metrics;
 
     public ApiMetricDocument() {
-    }
-
-    public String getNamespace() {
-        return namespace;
-    }
-
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
-    }
-
-    public String getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public List<ApiMetricDimension> getDimensions() {
-        return dimensions;
-    }
-
-    public void setDimensions(List<ApiMetricDimension> dimensions) {
-        this.dimensions = dimensions;
-    }
-
-    public List<ApiMetric> getMetrics() {
-        return metrics;
-    }
-
-    public void setMetrics(List<ApiMetric> metrics) {
-        this.metrics = metrics;
     }
 }

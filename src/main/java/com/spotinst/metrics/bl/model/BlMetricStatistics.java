@@ -1,5 +1,10 @@
 package com.spotinst.metrics.bl.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class BlMetricStatistics {
     private Double count;
     private Double sum;
@@ -18,43 +23,4 @@ public class BlMetricStatistics {
         this.maximum = maximum;
     }
 
-    public Double getCount() {
-        return count;
-    }
-
-    public void setCount(Double count) {
-        this.count = count;
-    }
-
-    public Double getSum() {
-        return sum;
-    }
-
-    public void setSum(Double sum) {
-        this.sum = sum;
-    }
-
-    public Double getAverage() {
-        return average;
-    }
-
-    public void setAverage(Double average) {
-        this.average = average;
-    }
-
-    public Double getMinimum() {
-        return minimum;
-    }
-
-    public void setMinimum(Double minimum) {
-        this.minimum = minimum;
-    }
-
-    public Double getMaximum() {
-        return maximum;
-    }
-
-    public void setMaximum(Double maximum) {
-        this.maximum = maximum;
-    }
 }

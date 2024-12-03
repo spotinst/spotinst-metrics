@@ -5,6 +5,7 @@ import com.spotinst.metrics.dal.models.elastic.ElasticMetricDatapoint;
 import com.spotinst.metrics.dal.models.elastic.ElasticMetricDimension;
 import com.spotinst.metrics.dal.models.elastic.ElasticMetricStatistics;
 import com.spotinst.metrics.dal.models.elastic.requests.ElasticMetricStatisticsRequest;
+import lombok.Getter;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
@@ -14,16 +15,13 @@ import java.util.Map;
 
 public abstract class BaseMetricAggregationParser<T extends ElasticMetricStatisticsRequest>
         implements IMetricAggregationParser {
+    @Getter
     protected String aggregationName;
     protected T      metricStatisticsRequest;
 
     protected BaseMetricAggregationParser(String aggregationName, T metricStatisticsRequest) {
         this.aggregationName = aggregationName;
         this.metricStatisticsRequest = metricStatisticsRequest;
-    }
-
-    public String getAggregationName() {
-        return aggregationName;
     }
 
     protected Map<String, ElasticMetricAggregations> deepCopy(Map<String, ElasticMetricAggregations> byRefResultMap) {

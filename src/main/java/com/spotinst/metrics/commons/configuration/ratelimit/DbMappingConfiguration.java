@@ -1,28 +1,17 @@
 package com.spotinst.metrics.commons.configuration.ratelimit;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Created by aharontwizer on 5/9/16.
  */
+@Setter
+@Getter
 public class DbMappingConfiguration {
 
     private String dbName;
     private String organizationsRange;
-
-    public String getDbName() {
-        return dbName;
-    }
-
-    public void setDbName(String dbName) {
-        this.dbName = dbName;
-    }
-
-    public String getOrganizationsRange() {
-        return organizationsRange;
-    }
-
-    public void setOrganizationsRange(String organizationsRange) {
-        this.organizationsRange = organizationsRange;
-    }
 
     @Override
     public String toString() {
