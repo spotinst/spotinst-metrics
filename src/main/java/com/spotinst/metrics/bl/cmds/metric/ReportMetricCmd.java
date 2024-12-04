@@ -5,10 +5,9 @@ import com.spotinst.dropwizard.bl.repo.RepoGenericResponse;
 import com.spotinst.dropwizard.common.context.RequestsContextManager;
 import com.spotinst.dropwizard.common.exceptions.bl.BlException;
 import com.spotinst.metrics.bl.model.BlMetricDocument;
-import com.spotinst.metrics.bl.model.BlMetricReportRequest;
-import com.spotinst.metrics.bl.model.responses.BlMetricReportResponse;
-import com.spotinst.metrics.bl.repos.MetricsRepoManager;
-//import com.spotinst.metrics.commons.threadpool.UpdateMetricMetadataCacheExecutor;
+import com.spotinst.metrics.bl.model.request.BlMetricReportRequest;
+import com.spotinst.metrics.bl.model.response.BlMetricReportResponse;
+import com.spotinst.metrics.bl.repos.RepoManager;
 import com.spotinst.metrics.dal.models.elastic.responses.ElasticMetricReportResponse;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -26,7 +25,7 @@ public class ReportMetricCmd {
         LOGGER.debug("Start reporting metrics data...");
         List<BlMetricDocument> metricDocuments = blRequest.getMetricDocuments();
 
-        if (CollectionUtils.isEmpty(metricDocuments) == false) { //TODO Tal: All this part can remove because I already set account Id
+        if (CollectionUtils.isEmpty(metricDocuments) == false) {
             String accountId = RequestsContextManager.getContext().getAccountId();
 
             if (StringUtils.isEmpty(accountId)) {
@@ -38,7 +37,7 @@ public class ReportMetricCmd {
             }
 
             RepoGenericResponse<ElasticMetricReportResponse> reportResponse =
-                    MetricsRepoManager.metricRepo.report(blRequest, index);
+                    RepoManager.metricRepo.report(blRequest, index);
 
             if (reportResponse.isRequestSucceed() || reportResponse.getValue() != null) {
 //                retVal = reportResponse.getValue();
