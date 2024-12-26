@@ -1,9 +1,7 @@
 FROM amazoncorretto:21.0.2-alpine3.19
 ARG VERSION
 
-# CHANGE IT!!!!
-ENV SERVICE_NAME=YOUR-SERVICE-NAME
-# CHANGE IT!!!!
+ENV SERVICE_NAME=spotinst-metrics
 
 ENV JDK_JAVA_OPTIONS="--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED"
 
