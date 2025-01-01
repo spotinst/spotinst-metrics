@@ -2,7 +2,6 @@ package com.spotinst.metrics.bl.parsers.stats;
 
 import com.spotinst.metrics.dal.models.elastic.ElasticMetricStatistics;
 import org.elasticsearch.search.aggregations.Aggregations;
-import org.elasticsearch.search.aggregations.pipeline.InternalSimpleValue;
 import org.elasticsearch.search.aggregations.pipeline.ParsedSimpleValue;
 
 import static com.spotinst.metrics.bl.index.spotinst.BaseIndexManager.roundFix;

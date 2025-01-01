@@ -23,5 +23,4 @@ public class ApiMetric {
 
     public ApiMetric() {
     }
-
 }

@@ -4,9 +4,10 @@ import com.spotinst.commons.mapper.entities.EntitiesMapper;
 import com.spotinst.metrics.api.model.ApiMetricDateRange;
 import com.spotinst.metrics.api.model.ApiMetricDimension;
 import com.spotinst.metrics.api.model.ApiMetricRange;
-import com.spotinst.metrics.api.requests.ApiMetricStatisticsRequest;
+import com.spotinst.metrics.api.model.request.ApiMetricStatisticsRequest;
 import com.spotinst.metrics.bl.model.*;
-import com.spotinst.metrics.bl.model.responses.BlMetricStatisticsResponse;
+import com.spotinst.metrics.bl.model.request.BlMetricStatisticsRequest;
+import com.spotinst.metrics.bl.model.response.BlMetricStatisticsResponse;
 import com.spotinst.metrics.commons.enums.MetricStatisticEnum;
 import com.spotinst.metrics.commons.enums.MetricsTimeIntervalEnum;
 import com.spotinst.metrics.dal.models.elastic.ElasticMetricDatapoint;
@@ -86,11 +87,11 @@ public class MetricStatisticConverter {
         }
 
         if (range.getMaximum() != null){
-            retVal.setGap(range.getMaximum());
+            retVal.setMaximum(range.getMaximum());
         }
 
         if (range.getMinimum() != null){
-            retVal.setGap(range.getMinimum());
+            retVal.setMinimum(range.getMinimum());
         }
 
         return retVal;

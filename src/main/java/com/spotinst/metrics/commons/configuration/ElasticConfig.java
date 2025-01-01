@@ -21,6 +21,8 @@ public class ElasticConfig {
     private String  clusterRegion;
     private IndexNamePatterns indexNamePatterns;
     private Set<String> indexNameOverriddenPatterns;
+    private String username;
+    private String password;
 
     @NotNull
     private String host;

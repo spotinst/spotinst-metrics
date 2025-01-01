@@ -2,7 +2,6 @@ package com.spotinst.metrics.api.filters;
 
 import com.spotinst.dropwizard.common.filters.InboundRequestFilter;
 import com.spotinst.dropwizard.common.filters.InboundRequestFilter.RequestFilterOptions;
-
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.container.DynamicFeature;
 import jakarta.ws.rs.container.ResourceInfo;

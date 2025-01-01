@@ -2,7 +2,6 @@ package com.spotinst.metrics.api.filters.account;
 
 import com.spotinst.dropwizard.common.filters.ResolveAccountIdRequestFilter;
 import com.spotinst.dropwizard.common.filters.auth.AccountQueryParamEnum;
-
 import jakarta.annotation.Priority;
 
 import static com.spotinst.dropwizard.common.constants.ServiceConstants.Filters.PRIORITY_INBOUND_RESOLVE_ACCOUNT_ID_FILTER;

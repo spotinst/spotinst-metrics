@@ -25,5 +25,4 @@ public class ApiMetricDateRange {
 
     public ApiMetricDateRange() {
     }
-
 }

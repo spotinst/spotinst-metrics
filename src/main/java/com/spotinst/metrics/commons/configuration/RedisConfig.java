@@ -2,7 +2,6 @@ package com.spotinst.metrics.commons.configuration;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotEmpty;
-
 import jakarta.validation.constraints.NotNull;
 
 //TODO Tal: Maybe not needed

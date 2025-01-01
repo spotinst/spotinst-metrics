@@ -1,7 +1,6 @@
 package com.spotinst.metrics.api.filters.auth;
 
 import com.spotinst.metrics.api.filters.account.MetricsResolveAccountIdRequestFilter;
-
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.container.DynamicFeature;
 import jakarta.ws.rs.container.ResourceInfo;

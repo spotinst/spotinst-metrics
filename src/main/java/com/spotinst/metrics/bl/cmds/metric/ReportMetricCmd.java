@@ -36,11 +36,11 @@ public class ReportMetricCmd {
                 metricDocuments.forEach(doc -> doc.setAccountId(accountId));
             }
 
-            RepoGenericResponse<ElasticMetricReportResponse> reportResponse =
+            RepoGenericResponse<BlMetricReportResponse> reportResponse =
                     RepoManager.metricRepo.report(blRequest, index);
 
             if (reportResponse.isRequestSucceed() || reportResponse.getValue() != null) {
-//                retVal = reportResponse.getValue();
+                retVal = reportResponse.getValue();
                 LOGGER.info("Successfully reported {} metrics", blRequest.getMetricDocuments().size());
 
                 // Async update metric metadata cache after metrics handed over to the ES bulk processor

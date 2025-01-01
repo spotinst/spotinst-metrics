@@ -60,9 +60,9 @@ public class RawIndexManager extends BaseIndexManager<ElasticMetricStatisticsReq
         String           accountIdPath = ACCOUNT_ID_RAW_DIMENSION_NAME;
 
         // If reading from an optimized index created by template, there is no need to append the '.keyword' suffix
-        if(IS_READ_FROM_OPTIMIZED_INDEX == false) {
-            accountIdPath += METRIC_KEYWORD_SUFFIX;
-        }
+//        if(IS_READ_FROM_OPTIMIZED_INDEX == false) {
+//            accountIdPath += METRIC_KEYWORD_SUFFIX;
+//        }
 
         TermQueryBuilder accountIdQuery = QueryBuilders.termQuery(accountIdPath, accountId);
 

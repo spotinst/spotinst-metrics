@@ -1,8 +1,8 @@
 package com.spotinst.metrics.commons.converters;
 
 import com.spotinst.commons.converters.BaseConverter;
-import com.spotinst.commons.mapper.entities.EntitiesMapper;
 import com.spotinst.commons.enums.OrganizationRegistrationStateEnum;
+import com.spotinst.commons.mapper.entities.EntitiesMapper;
 import com.spotinst.metrics.commons.enums.INamedEnum;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;

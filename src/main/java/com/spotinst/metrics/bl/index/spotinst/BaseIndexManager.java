@@ -156,16 +156,17 @@ public abstract class BaseIndexManager<T extends ElasticMetricStatisticsRequest>
             throw new DalException(errMsg);
         } else {
             namespaces.add(reqNamespace);
-
-            if(reqNamespace.toLowerCase().equals(BALANCER_NAMESPACE_OLD)) {
-                namespaces.add(BALANCER_NAMESPACE_NEW);
-            }
-            else if(reqNamespace.toLowerCase().equals(SYSTEM_NAMESPACE_OLD)) {
-                namespaces.add(SYSTEM_NAMESPACE_NEW);
-            }
+            //TODO Tal : I think we can delete it
+//            if(reqNamespace.toLowerCase().equals(BALANCER_NAMESPACE_OLD)) {
+//                namespaces.add(BALANCER_NAMESPACE_NEW);
+//            }
+//            else if(reqNamespace.toLowerCase().equals(SYSTEM_NAMESPACE_OLD)) {
+//                namespaces.add(SYSTEM_NAMESPACE_NEW);
+//            }
         }
 
-        retVal = new TermsQueryBuilder(NAMESPACE_FIELD_PATH + METRIC_KEYWORD_SUFFIX, namespaces); //TODO Tal: need to check if keyword necessary
+//        retVal = new TermsQueryBuilder(NAMESPACE_FIELD_PATH + METRIC_KEYWORD_SUFFIX, namespaces);
+        retVal = new TermsQueryBuilder(NAMESPACE_FIELD_PATH, namespaces);
         return retVal;
     }
 

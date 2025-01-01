@@ -9,9 +9,5 @@ public class IndexNamePatterns {
     private String readPattern;
     private String writePattern;
     private String aggregationReadPattern;
-
-    public IndexNamePatterns() {
-    }
-
 }
 

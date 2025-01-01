@@ -9,7 +9,6 @@ public class MetricsConstants {
     public static class FieldPath {
         public static final String METRIC_COUNT_FIELD_PATH_FORMAT     = "metrics.%s.count";
         public static final String METRIC_VALUE_FIELD_PATH_FORMAT     = "metrics.%s.value";
-        public static final String METRIC_STATISTIC_FIELD_PATH_FORMAT = "metrics.%s.%s";
         public static final String METRIC_KEYWORD_SUFFIX              = ".keyword";
     }
 

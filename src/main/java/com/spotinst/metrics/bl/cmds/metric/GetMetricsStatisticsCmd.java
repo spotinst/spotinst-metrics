@@ -6,9 +6,9 @@ import com.spotinst.dropwizard.common.exceptions.bl.BlException;
 import com.spotinst.metrics.MetricsAppContext;
 import com.spotinst.metrics.bl.errors.ErrorCodes;
 import com.spotinst.metrics.bl.model.BlMetricDateRange;
-import com.spotinst.metrics.bl.model.BlMetricStatisticsRequest;
-import com.spotinst.metrics.bl.model.responses.BlMetricStatisticsResponse;
-import com.spotinst.metrics.bl.repos.MetricsRepoManager;
+import com.spotinst.metrics.bl.model.request.BlMetricStatisticsRequest;
+import com.spotinst.metrics.bl.model.response.BlMetricStatisticsResponse;
+import com.spotinst.metrics.bl.repos.RepoManager;
 import com.spotinst.metrics.commons.utils.ContextUtils;
 import com.spotinst.metrics.commons.utils.ElasticMetricTimeUtils;
 import com.spotinst.metrics.commons.utils.ElasticTimeUnit;
@@ -44,7 +44,7 @@ public class GetMetricsStatisticsCmd extends BaseCmd<BlMetricStatisticsResponse>
         // Data ownership is being enforced by placing the account id from the context on the elastic search query
         BlMetricStatisticsResponse retVal;
         RepoGenericResponse<BlMetricStatisticsResponse> response =
-                MetricsRepoManager.metricRepo.getMetricsStatistics(request, index);
+                RepoManager.metricRepo.getMetricsStatistics(request, index);
 
         if (response.isRequestSucceed() == false || response.getValue() == null) {
             LOGGER.error(String.format("Failed to get metric statistics: %s", request.toString()),

@@ -13,9 +13,4 @@ public class BlMetric {
 
     public BlMetric() {
     }
-
-    public BlMetric(String name, String unit) {
-        this.name = name;
-        this.unit = unit;
-    }
 }

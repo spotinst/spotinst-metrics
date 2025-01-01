@@ -85,7 +85,6 @@ public class EsIndexNamingUtils {
         SimpleDateFormat formatter       = new SimpleDateFormat(INDEX_TIME_PATTERN);
         String           formattedDate   = formatter.format(today);
         String           idxNameWithDate = String.format(DATED_INDEX_NAME_FORMAT, formattedDate);
-//        String           idxNameWithDate = String.format(formattedDate);
 
         retVal = String.format(useFormat, idxNameWithDate);
         return retVal;

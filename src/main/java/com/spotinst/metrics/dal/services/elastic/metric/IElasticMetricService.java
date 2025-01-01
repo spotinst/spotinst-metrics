@@ -5,8 +5,8 @@ import com.spotinst.metrics.dal.models.elastic.ElasticMetricDocument;
 import com.spotinst.metrics.dal.models.elastic.requests.ElasticDimensionsValuesRequest;
 import com.spotinst.metrics.dal.models.elastic.requests.ElasticMetricStatisticsRequest;
 import com.spotinst.metrics.dal.models.elastic.responses.ElasticDimensionsValuesResponse;
-import com.spotinst.metrics.dal.models.elastic.responses.ElasticMetricStatisticsResponse;
 import com.spotinst.metrics.dal.models.elastic.responses.ElasticMetricReportResponse;
+import com.spotinst.metrics.dal.models.elastic.responses.ElasticMetricStatisticsResponse;
 
 import java.util.List;
 

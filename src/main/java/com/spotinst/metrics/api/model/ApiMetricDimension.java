@@ -19,5 +19,4 @@ public class ApiMetricDimension {
 
     public ApiMetricDimension() {
     }
-
 }

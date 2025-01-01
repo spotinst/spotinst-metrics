@@ -4,9 +4,9 @@ import com.spotinst.commons.cmd.BaseCmd;
 import com.spotinst.metrics.bl.model.BlMetric;
 import com.spotinst.metrics.bl.model.BlMetricDimension;
 import com.spotinst.metrics.bl.model.BlMetricDocument;
-import com.spotinst.metrics.bl.model.BlMetricReportRequest;
 import com.spotinst.metrics.bl.model.metadata.BlMetricMetadata;
 import com.spotinst.metrics.bl.model.metadata.BlNamespaceDimensionPair;
+import com.spotinst.metrics.bl.model.request.BlMetricReportRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

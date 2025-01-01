@@ -11,5 +11,4 @@ public class BlMetricDimension {
 
     public BlMetricDimension() {
     }
-
 }

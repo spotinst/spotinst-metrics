@@ -1,10 +1,10 @@
 package com.spotinst.metrics.commons.converters;
 
 import com.spotinst.commons.mapper.entities.EntitiesMapper;
-import com.spotinst.metrics.api.requests.ApiDimensionsValuesRequest;
-import com.spotinst.metrics.api.responses.ApiDimensionsValuesResponse;
-import com.spotinst.metrics.bl.model.BlDimensionsValuesRequest;
-import com.spotinst.metrics.bl.model.responses.BlDimensionsValuesResponse;
+import com.spotinst.metrics.api.model.request.ApiDimensionsValuesRequest;
+import com.spotinst.metrics.api.model.response.ApiDimensionsValuesResponse;
+import com.spotinst.metrics.bl.model.request.BlDimensionsValuesRequest;
+import com.spotinst.metrics.bl.model.response.BlDimensionsValuesResponse;
 import com.spotinst.metrics.dal.models.elastic.requests.ElasticDimensionsValuesRequest;
 import com.spotinst.metrics.dal.models.elastic.responses.ElasticDimensionsValuesResponse;
 

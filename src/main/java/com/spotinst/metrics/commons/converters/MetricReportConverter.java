@@ -6,17 +6,19 @@ import com.spotinst.dropwizard.common.exceptions.bl.BlException;
 import com.spotinst.metrics.api.model.ApiMetric;
 import com.spotinst.metrics.api.model.ApiMetricDimension;
 import com.spotinst.metrics.api.model.ApiMetricDocument;
-import com.spotinst.metrics.api.requests.ApiMetricsReportRequest;
-import com.spotinst.metrics.api.responses.ApiMetricStatisticsResponse;
+import com.spotinst.metrics.api.model.request.ApiMetricsReportRequest;
+import com.spotinst.metrics.api.model.response.ApiMetricStatisticsResponse;
 import com.spotinst.metrics.bl.errors.ErrorCodes;
-import com.spotinst.metrics.bl.model.*;
-import com.spotinst.metrics.bl.model.responses.BlMetricReportResponse;
-import com.spotinst.metrics.bl.model.responses.BlMetricStatisticsResponse;
-import com.spotinst.metrics.commons.constants.MetricsConstants;
+import com.spotinst.metrics.bl.model.BlMetric;
+import com.spotinst.metrics.bl.model.BlMetricDimension;
+import com.spotinst.metrics.bl.model.BlMetricDocument;
+import com.spotinst.metrics.bl.model.request.BlMetricReportRequest;
+import com.spotinst.metrics.bl.model.response.BlMetricReportResponse;
+import com.spotinst.metrics.bl.model.response.BlMetricStatisticsResponse;
 import com.spotinst.metrics.dal.models.elastic.ElasticMetric;
 import com.spotinst.metrics.dal.models.elastic.ElasticMetricDocument;
 import com.spotinst.metrics.dal.models.elastic.requests.ElasticMetricReportRequest;
-import com.spotinst.metrics.dal.models.elastic.responses.EsMetricReportResponse;
+import com.spotinst.metrics.dal.models.elastic.responses.ElasticMetricReportResponse;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,11 +92,6 @@ public class MetricReportConverter {
         return retVal;
     }
 
-    public static BlMetricReportResponse esToBl(EsMetricReportResponse response){
-        BlMetricReportResponse retVal = EntitiesMapper.instance.mapType(response, BlMetricReportResponse.class);
-        return retVal;
-    }
-
     public static ElasticMetricReportRequest toEs(BlMetricReportRequest request) {
         ElasticMetricReportRequest retVal = new ElasticMetricReportRequest();
         List<ElasticMetricDocument> esDocumentList = new ArrayList<>();
@@ -151,12 +148,16 @@ public class MetricReportConverter {
         for (BlMetric blMetric : metrics){
             ElasticMetric esMetric = new ElasticMetric();
             esMetric.setName(blMetric.getName());
-//            esMetric.setName(blMetric.getName() + MetricsConstants.Dimension.METRIC_KEYWORD);
             esMetric.setCount(blMetric.getCount());
             esMetric.setValue(blMetric.getValue());
             esMetric.setUnit(blMetric.getUnit());
             retVal.put(blMetric.getName(), esMetric);
         }
         return retVal;
+    }
+
+    public static BlMetricReportResponse toBl(ElasticMetricReportResponse response) {
+        BlMetricReportResponse result = EntitiesMapper.instance.mapType(response, BlMetricReportResponse.class);
+        return result;
     }
 }

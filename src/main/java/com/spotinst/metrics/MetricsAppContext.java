@@ -3,6 +3,8 @@ package com.spotinst.metrics;
 import com.spotinst.dropwizard.common.context.BaseAppContext;
 import com.spotinst.metrics.bl.model.BlOrganization;
 import com.spotinst.metrics.commons.configuration.MetricsConfiguration;
+import com.spotinst.metrics.dal.services.elastic.ElasticSearchPercentilesService;
+import com.spotinst.metrics.dal.services.elastic.IElasticSearchPercentilesService;
 import com.spotinst.metrics.dal.services.elastic.infra.ElasticSearchService;
 import com.spotinst.metrics.dal.services.elastic.infra.IElasticSearchService;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -32,7 +34,8 @@ public class MetricsAppContext extends BaseAppContext<MetricsConfiguration, BlOr
     //region Members
     private Map<BigInteger, BlOrganization> organizations;
     private RestHighLevelClient             elasticClient;
-    private IElasticSearchService           elasticSearchService;
+    private IElasticSearchService            elasticSearchService;
+    private IElasticSearchPercentilesService elasticSearchPercentilesService;
 
     //endregion
 
@@ -43,6 +46,15 @@ public class MetricsAppContext extends BaseAppContext<MetricsConfiguration, BlOr
             elasticSearchService = new ElasticSearchService(); // Ensure this is a valid instance
         }
         return elasticSearchService;
+    }
+
+    // Method to get the ElasticSearchService
+    public IElasticSearchPercentilesService getElasticSearchPercentilesService() {
+        if (elasticSearchPercentilesService == null) {
+            // Initialize the elasticSearchService here
+            elasticSearchPercentilesService = new ElasticSearchPercentilesService(); // Ensure this is a valid instance
+        }
+        return elasticSearchPercentilesService;
     }
 
     //region Getters and Setters
@@ -71,6 +83,10 @@ public class MetricsAppContext extends BaseAppContext<MetricsConfiguration, BlOr
 
     public void setElasticSearchService(IElasticSearchService elasticSearchService) {
         this.elasticSearchService = elasticSearchService;
+    }
+
+    public void setElasticSearchPercentilesService(IElasticSearchPercentilesService elasticSearchPercentilesService) {
+        this.elasticSearchPercentilesService = elasticSearchPercentilesService;
     }
 
     //endregion

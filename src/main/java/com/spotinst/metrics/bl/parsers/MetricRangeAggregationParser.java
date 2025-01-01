@@ -8,6 +8,8 @@ import com.spotinst.metrics.dal.services.elastic.infra.AggCompositeKey;
 import org.apache.commons.collections4.CollectionUtils;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.range.InternalRange;
+import org.elasticsearch.search.aggregations.bucket.range.ParsedRange;
+import org.elasticsearch.search.aggregations.bucket.range.Range;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,11 +54,10 @@ public class MetricRangeAggregationParser extends BaseMetricAggregationParser<El
             String       termKey = compositeKey.getTermKey();
             Aggregations aggs    = aggsMapByKeys.get(compositeKey);
 
-            InternalRange internalRange = aggs.get(aggregationName);
+            ParsedRange parsedRange = aggs.get(aggregationName);
 
-            if (internalRange == null) {
-                String msg =
-                        "Cannot get elastic search internal range buckets for [%s], skipping to the next aggregation level/sibling";
+            if (parsedRange == null) {
+                String msg = "Cannot get elastic search parsed range buckets for [%s], skipping to the next aggregation level/sibling";
                 LOGGER.debug(String.format(msg, aggregationName));
                 continue;
             }
@@ -73,10 +74,10 @@ public class MetricRangeAggregationParser extends BaseMetricAggregationParser<El
                 iterationMetricSequence = new ElasticMetricAggregations();
             }
 
-            List<InternalRange.Bucket> buckets = internalRange.getBuckets();
+            List<? extends Range.Bucket> buckets = parsedRange.getBuckets();
 
             if (CollectionUtils.isEmpty(buckets) == false) {
-                for (InternalRange.Bucket bucket : buckets) {
+                for (Range.Bucket bucket : buckets) {
                     String rangeValue = bucket.getKeyAsString();
 
                     // Create the range dimension

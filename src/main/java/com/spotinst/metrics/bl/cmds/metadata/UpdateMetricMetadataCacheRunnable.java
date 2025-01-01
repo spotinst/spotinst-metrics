@@ -1,7 +1,7 @@
 package com.spotinst.metrics.bl.cmds.metadata;
 
 import com.spotinst.dropwizard.common.executors.BaseRunnableExecutor;
-import com.spotinst.metrics.bl.model.BlMetricReportRequest;
+import com.spotinst.metrics.bl.model.request.BlMetricReportRequest;
 
 /**
  * Created by zachi.nachshon on 3/19/17.

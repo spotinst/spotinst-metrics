@@ -5,11 +5,12 @@ import com.spotinst.dropwizard.common.exceptions.ExceptionHelper;
 import com.spotinst.dropwizard.common.exceptions.bl.BlException;
 import com.spotinst.dropwizard.common.exceptions.dal.DalException;
 import com.spotinst.metrics.MetricsAppContext;
-import com.spotinst.metrics.bl.model.BlDimensionsValuesRequest;
-import com.spotinst.metrics.bl.model.BlMetricReportRequest;
-import com.spotinst.metrics.bl.model.BlMetricStatisticsRequest;
-import com.spotinst.metrics.bl.model.responses.BlDimensionsValuesResponse;
-import com.spotinst.metrics.bl.model.responses.BlMetricStatisticsResponse;
+import com.spotinst.metrics.bl.model.request.BlDimensionsValuesRequest;
+import com.spotinst.metrics.bl.model.request.BlMetricReportRequest;
+import com.spotinst.metrics.bl.model.request.BlMetricStatisticsRequest;
+import com.spotinst.metrics.bl.model.response.BlDimensionsValuesResponse;
+import com.spotinst.metrics.bl.model.response.BlMetricReportResponse;
+import com.spotinst.metrics.bl.model.response.BlMetricStatisticsResponse;
 import com.spotinst.metrics.bl.repos.interfaces.IMetricRepo;
 import com.spotinst.metrics.commons.converters.DimensionsValuesConverter;
 import com.spotinst.metrics.commons.converters.MetricReportConverter;
@@ -49,34 +50,37 @@ public class MetricRepo implements IMetricRepo {
 
     //region Override Methods
     @Override
-    public RepoGenericResponse<ElasticMetricReportResponse> report(BlMetricReportRequest request, String index) {
-        RepoGenericResponse<ElasticMetricReportResponse> retVal;
-        List<ElasticMetricDocument>                      dalMetrics = new ArrayList<>();
-
-        try { //TODO Tal: I can remove this try and catch
-            ElasticMetricReportRequest esMetricReportRequest = MetricReportConverter.toEs(request);
-            dalMetrics = esMetricReportRequest.getMetricDocuments();
-        }
-        catch (BlException exception) {
-            String errMsg = String.format("Cannot report metrics to elastic search, no metrics to report. Request: %s",
-                                          request.toString());
-            LOGGER.error(errMsg);
-        }
+    public RepoGenericResponse<BlMetricReportResponse> report(BlMetricReportRequest request, String index) {
+        RepoGenericResponse<BlMetricReportResponse> retVal;
 
         try {
-            ElasticMetricReportResponse esMetricResponse = elasticService.reportMetrics(dalMetrics, index);
-//            BlMetricReportResponse blMetricResponse = MetricReportConverter.esToBl(esMetricResponse);
+            ElasticMetricReportRequest esMetricReportRequest = MetricReportConverter.toEs(request);
+            List<ElasticMetricDocument> dalMetrics = esMetricReportRequest.getMetricDocuments();
 
-            retVal = new RepoGenericResponse<>(esMetricResponse);
+            ElasticMetricReportResponse esMetricResponse = elasticService.reportMetrics(dalMetrics, index);
+            BlMetricReportResponse  blMetricResponse = MetricReportConverter.toBl(esMetricResponse);
+            retVal = new RepoGenericResponse<>(blMetricResponse);
         }
         catch (DalException ex) {
-            LOGGER.error("Failed to report metrics in ES. Error: {}", ex.getMessage());
-            DalException dalException = new DalException(ex.getMessage(), ex.getCause());
-            retVal = ExceptionHelper.handleDalException(dalException);
+            retVal = ExceptionHelper.handleDalException(ex);
         }
 
         return retVal;
     }
+        //            LOGGER.error("Failed to report metrics in ES. Error: {}", ex.getMessage());
+        //            DalException dalException = new DalException(ex.getMessage(), ex.getCause());
+        //        catch (BlException exception) {
+        //            String errMsg = String.format("Cannot report metrics to elastic search, no metrics to report. Request: %s",
+        //                                          request.toString());
+        //            LOGGER.error(errMsg);
+        //        }
+
+        //        try {
+        //            ElasticMetricReportResponse esMetricResponse = elasticService.reportMetrics(dalMetrics, index);
+        ////            BlMetricReportResponse blMetricResponse = MetricReportConverter.esToBl(esMetricResponse);
+        //
+        //            retVal = new RepoGenericResponse<>(esMetricResponse);
+        //        }
 
     @Override
     public RepoGenericResponse<BlMetricStatisticsResponse> getMetricsStatistics(BlMetricStatisticsRequest request,
@@ -87,6 +91,7 @@ public class MetricRepo implements IMetricRepo {
             ElasticMetricStatisticsRequest  esGetMetricStatsRequest = MetricStatisticConverter.toEs(request);
             ElasticMetricStatisticsResponse esMetricResp            =
                     elasticService.getMetricsStatistics(esGetMetricStatsRequest, index);
+
             BlMetricStatisticsResponse      blMetricResp            = MetricStatisticConverter.toBl(esMetricResp);
             retVal = new RepoGenericResponse<>(blMetricResp);
         }

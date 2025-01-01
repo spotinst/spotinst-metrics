@@ -1,10 +1,7 @@
 package com.spotinst.metrics.dal.models.elastic;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.spotinst.metrics.bl.model.BlMetric;
-import com.spotinst.metrics.bl.model.BlMetricDimension;
 
-import java.util.List;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

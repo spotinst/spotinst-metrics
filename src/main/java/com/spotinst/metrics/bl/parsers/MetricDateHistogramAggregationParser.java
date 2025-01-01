@@ -7,7 +7,6 @@ import com.spotinst.metrics.dal.services.elastic.infra.AggCompositeKey;
 import org.apache.commons.collections4.CollectionUtils;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
-import org.elasticsearch.search.aggregations.bucket.histogram.InternalDateHistogram;
 import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogram;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

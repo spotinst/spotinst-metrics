@@ -1,26 +1,30 @@
 package com.spotinst.metrics.dal.services.elastic.infra;
 
 import com.spotinst.metrics.MetricsAppContext;
-import com.spotinst.metrics.commons.configuration.ElasticConfig;
-import com.spotinst.metrics.commons.configuration.MetricsConfiguration;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
+import org.elasticsearch.client.RestHighLevelClient;
 import com.spotinst.metrics.commons.configuration.BackoffPolicyConfig;
 import com.spotinst.metrics.commons.configuration.BulkProcessorIndexerConfig;
+import com.spotinst.metrics.commons.configuration.ElasticConfig;
+import com.spotinst.metrics.commons.configuration.MetricsConfiguration;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHost;
 import org.elasticsearch.action.DocWriteRequest;
 import org.elasticsearch.action.bulk.BackoffPolicy;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.common.unit.ByteSizeUnit;
 import org.elasticsearch.common.unit.ByteSizeValue;
-import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.core.TimeValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.http.HttpHost;
 
 import java.io.IOException;
 import java.util.List;
@@ -110,14 +114,40 @@ public abstract class BaseElasticSearchService implements IElasticSearchService 
         printBulkProcessorSettings(bulkActions, bulkSize, bulkInterval, bulkConcurrentRequests);
     }
 
+//    private void initRestHighLevelClient() {
+//        LOGGER.info("Starting elastic search RestHighLevelClient initialization...");
+//
+//        ElasticConfig config = MetricsAppContext.getInstance().getConfiguration().getElastic();
+//
+//        String  host = config.getHost();
+//        Integer port = config.getPort();
+//        String  scheme = config.getScheme();
+////        String userName = config.getUsername();
+////        String password = config.getPassword();
+//
+//        if (StringUtils.isEmpty(host) || port == null || StringUtils.isEmpty(scheme)) {
+//            String errMsg = "Cannot create elastic search RestHighLevelClient, host is missing !";
+//            LOGGER.error(errMsg);
+//            throw new RuntimeException(errMsg);
+//        }
+//
+//        RestClientBuilder builder = RestClient.builder(new HttpHost(host, port, scheme));
+//
+//        this.restHighLevelClient = new RestHighLevelClient(builder);
+//
+//        LOGGER.info("Finished elastic search RestHighLevelClient initialization...");
+//    }
+
     private void initRestHighLevelClient() {
         LOGGER.info("Starting elastic search RestHighLevelClient initialization...");
 
         ElasticConfig config = MetricsAppContext.getInstance().getConfiguration().getElastic();
 
-        String  host = config.getHost();
+        String host = config.getHost();
         Integer port = config.getPort();
-        String  scheme = config.getScheme();
+        String scheme = config.getScheme();
+        String userName = config.getUsername();
+        String password = config.getPassword();
 
         if (StringUtils.isEmpty(host) || port == null || StringUtils.isEmpty(scheme)) {
             String errMsg = "Cannot create elastic search RestHighLevelClient, host is missing !";
@@ -125,7 +155,11 @@ public abstract class BaseElasticSearchService implements IElasticSearchService 
             throw new RuntimeException(errMsg);
         }
 
-        RestClientBuilder builder = RestClient.builder(new HttpHost(host, port, scheme));
+        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(userName, password));
+
+        RestClientBuilder builder = RestClient.builder(new HttpHost(host, port, scheme))
+                                              .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
 
         this.restHighLevelClient = new RestHighLevelClient(builder);
 

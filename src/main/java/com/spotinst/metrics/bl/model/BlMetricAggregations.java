@@ -13,5 +13,4 @@ public class BlMetricAggregations {
 
     public BlMetricAggregations() {
     }
-
 }

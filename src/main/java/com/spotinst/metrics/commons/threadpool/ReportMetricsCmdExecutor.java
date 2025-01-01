@@ -1,7 +1,6 @@
 package com.spotinst.metrics.commons.threadpool;
 
 import com.spotinst.dropwizard.common.executors.BaseRunnableExecutor;
-import com.spotinst.metrics.MetricsAppContext;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

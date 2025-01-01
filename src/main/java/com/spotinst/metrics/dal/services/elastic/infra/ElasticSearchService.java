@@ -218,7 +218,6 @@ import com.spotinst.metrics.dal.models.elastic.responses.ElasticMetricReportResp
 import com.spotinst.metrics.dal.models.elastic.responses.ElasticMetricStatisticsResponse;
 import com.spotinst.metrics.dal.services.elastic.metric.ElasticMetricService;
 import com.spotinst.metrics.dal.services.elastic.metric.IElasticMetricService;
-import org.elasticsearch.client.RestHighLevelClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

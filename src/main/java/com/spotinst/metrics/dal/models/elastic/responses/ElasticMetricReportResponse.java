@@ -1,6 +1,6 @@
 package com.spotinst.metrics.dal.models.elastic.responses;
 
-import com.spotinst.metrics.bl.model.responses.BlMetricReportResponse;
+import com.spotinst.metrics.bl.model.response.BlMetricReportResponse;
 import com.spotinst.metrics.dal.models.elastic.ElasticMetricResultStatus;
 
 public class ElasticMetricReportResponse extends BlMetricReportResponse {
