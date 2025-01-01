@@ -8,16 +8,64 @@ coreDbToken: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzcG90aW5zdCIsImV4cC
 ##############################################
 #                SWAGGER
 ##############################################
-swagger:
-  resourcePackage: com.spotinst.service.api.resources.app
+#swagger:
+#  resourcePackage: com.spotinst.service.api.resources.app
 
 ##############################################
 #                SERVICES
 ##############################################
-services:
-  eventsServiceUrl: http://events-public.dev.spotinst.com:2300
-  dbServiceUrl: http://db-java-public.dev.spotinst.com:2100
-  umsServiceUrl: http://ums-public.dev.spotinst.com:4100
+#services:
+##  eventsServiceUrl: http://events-public.dev.spotinst.com:2300
+#  dbServiceUrl: http://db-java-public.dev.spotinst.com:2100
+#  umsServiceUrl: http://ums-public.dev.spotinst.com:4100
+
+##############################################
+#                ELASTIC
+##############################################
+elastic:
+  scheme: https
+  host: vpc-es-aws-statistics-dev-cl2wtyjjsmb67aia2teaama6eq.us-east-2.es.amazonaws.com
+  port: 443
+  # Values in ms
+  connectionTimeout: 3000
+  socketTimeout: 90000
+  clusterRegion: us-east-2
+  indexNameOverriddenPatterns: [ "spot_storage", "azure_stateful_opt", "azure_ocean_opt" ]
+
+  indexNamePatterns:
+    # Add an index name pattern to be used by the get statistics requests
+    readPattern: "opt_%s"
+
+    # Add an index name pattern to be used by the get aggregative statistics requests
+    aggregationReadPattern: "agg_%s"
+
+    # Add an index name pattern to be used in the report metrics
+    # For optimized index, prefix MUST BE ALIGNED WITH CLUSTER TEMPLATE of 'opt_*'
+#    writePattern: "opt_%s_test"
+    writePattern: "opt_%s"
+
+  bulkProcessorIndexer:
+
+    # Sets when to flush a new bulk request based on the number of actions currently added
+    bufferedActions: 1000
+
+    # Sets when to flush a new bulk request based on the size of actions currently added
+    sizeInMB: 5
+
+    # Sets a flush interval flushing *any* bulk actions pending if the interval passes
+    flushIntervalInSeconds: 5
+
+    # Sets the number of concurrent requests allowed to be executed
+    concurrentRequests: 16
+
+    # Provides a backoff policy for bulk requests for whenever a bulk request is rejected due to resource constraints
+    backoffPolicyConfig:
+
+      # The initial delay defines how long to wait for the first retry attempt
+      initialDelayMs: 100
+
+      # The maximum number of retries. Must be a non-negative number
+      numOfRetries: 3
 
 
 ##############################################
@@ -33,14 +81,14 @@ httpClientDefaultRetryCount: 3
 ##############################################
 #                RATE LIMIT
 ##############################################
-rateLimit:
-  byOrganization:
-    organizationDefault: 300
-    organizations:
-      606079861234: 400
-
-  byMySql:
-    mySqlDefault: 1000
+#rateLimit:
+#  byOrganization:
+#    organizationDefault: 300
+#    organizations:
+#      606079861234: 400
+#
+#  byMySql:
+#    mySqlDefault: 1000
 
 
 ##############################################
@@ -89,6 +137,20 @@ redisConfiguration:
   poolMaxIdle: 300 # max idle connections
   poolMaxWaitMillis: 1000 #Max milliseconds a resource can go unused before it should be destroyed.
   poolMinIdle: 100 #Minimum number of resources to keep in pool at any given time
+
+
+queryConfig:
+  # Limit the amount of dimension keys that can be asked for in a single request
+  # Every dimensions has its own terms aggregation on the elastic search, must be limited
+  dimensionsKeysRequestLimit: 50
+
+  # Indicate how many values should be returned for each dimension key
+  # This is the maximum cap for items in each terms aggregation bucket
+  dimensionsValuesResultPerBucketLimit: 100
+
+  # Limit the amount of indices we're enabling to query for
+  # If query limit is exceeded, we'll set a new date range of NOW - (last 30 days)
+  queryTimeLimitInDays: 32
 
 
 ##############################################
