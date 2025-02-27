@@ -11,9 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by zachi.nachshon on 3/2/17.
@@ -102,13 +100,13 @@ public class EsIndexNamingUtils {
         return retVal;
     }
 
-    public static String[] generateIndicesByDateRange(ElasticMetricDateRange dateRange, String index) {
+    public static List<String> generateIndicesByDateRange(ElasticMetricDateRange dateRange, String index) {
         Boolean useAggregationIndex = false;
         return generateIndicesByDateRange(dateRange, index, useAggregationIndex);
     }
 
-    public static String[] generateIndicesByDateRange(ElasticMetricDateRange dateRange, String index, Boolean useAggregationIndex) {
-        String[]         retVal;
+    public static List<String> generateIndicesByDateRange(ElasticMetricDateRange dateRange, String index, Boolean useAggregationIndex) {
+        List<String>     retVal;
         SimpleDateFormat formatter = new SimpleDateFormat(INDEX_TIME_PATTERN);
         Date             from      = dateRange.getFrom();
         Date             to        = dateRange.getTo();
@@ -116,8 +114,9 @@ public class EsIndexNamingUtils {
         if(dateRange == null) {
             Boolean useWriteIndexNameFormat = false;
             String idxName = generateDailyIndexName(useWriteIndexNameFormat, index);
-            retVal = new String[]{idxName};
-        } else {
+            retVal = new ArrayList<>(Collections.singletonList(idxName));
+        }
+        else {
             String readIndexPattern = null;
 
             if(index == null) {
@@ -152,8 +151,7 @@ public class EsIndexNamingUtils {
             LOGGER.debug(String.format("Successfully generated [%s] indices for date range [%s] - [%s]", datesSet.size(),
                                        from.toString(), to.toString()));
 
-            retVal = datesSet.toArray(new String[datesSet.size()]);
-        }
+            retVal = new ArrayList<>(datesSet);        }
 
         return retVal;
     }

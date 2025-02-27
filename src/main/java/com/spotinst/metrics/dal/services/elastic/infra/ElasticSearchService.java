@@ -230,8 +230,8 @@ public class ElasticSearchService extends BaseElasticSearchService {
 
     public ElasticSearchService() {
         super();
-        this.restHighLevelClient = MetricsAppContext.getInstance().getElasticClient();
-        this.metricService = new ElasticMetricService(restHighLevelClient);
+        this.elasticsearchClient = MetricsAppContext.getInstance().getElasticClient();
+        this.metricService = new ElasticMetricService(elasticsearchClient);
     }
 
 //    @Override

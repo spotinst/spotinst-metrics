@@ -8,7 +8,15 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.client.RestClientBuilder;
-import org.elasticsearch.client.RestHighLevelClient;
+//import org.elasticsearch.client.RestHighLevelClient;
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.transport.rest_client.RestClientTransport;
+import co.elastic.clients.json.jackson.JacksonJsonpMapper;
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.elasticsearch.client.RestClient;
 import com.spotinst.commons.exceptions.ApplicationRequirementsException;
 import com.spotinst.commons.mapper.entities.registration.BaseMappingRegistration;
 import com.spotinst.dropwizard.common.context.BaseAppContext;
@@ -28,7 +36,7 @@ import io.dropwizard.servlets.tasks.Task;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequestInterceptor;
 import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestHighLevelClient;
+//import org.elasticsearch.client.RestHighLevelClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vc.inreach.aws.request.AWSSigner;
@@ -130,15 +138,49 @@ public class MetricsApplication extends BaseApplication<MetricsConfiguration, To
         credentialsProvider.setCredentials(AuthScope.ANY,
                                            new UsernamePasswordCredentials(username, password));
 
-        RestHighLevelClient client = new RestHighLevelClient(
-                RestClient.builder(new HttpHost(clusterHost, clusterPort, clusterScheme))
-                          .setHttpClientConfigCallback(hacb -> hacb.setDefaultCredentialsProvider(credentialsProvider))
-                          .setRequestConfigCallback(
-                                  requestConfigBuilder -> requestConfigBuilder.setConnectTimeout(connectionTimeout)
-                                                                              .setSocketTimeout(socketTimeout)));
+        // Create the low-level client
+        RestClient restClient = RestClient.builder(new HttpHost(clusterHost, clusterPort, clusterScheme))
+                                          .setHttpClientConfigCallback(hacb -> hacb.setDefaultCredentialsProvider(credentialsProvider))
+                                          .setRequestConfigCallback(
+                                                  requestConfigBuilder -> requestConfigBuilder.setConnectTimeout(connectionTimeout)
+                                                                                              .setSocketTimeout(socketTimeout))
+                                          .build();
+
+        // Create the transport with a Jackson mapper
+        RestClientTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
+
+        // And create the API client
+        ElasticsearchClient client = new ElasticsearchClient(transport);
 
         MetricsAppContext.getInstance().setElasticClient(client);
     }
+
+//    private void initElasticClient() {
+//        MetricsConfiguration configuration = MetricsAppContext.getInstance().getConfiguration();
+//        ElasticConfig elastic = configuration.getElastic();
+//
+//        String clusterScheme = elastic.getScheme();
+//        String clusterHost = elastic.getHost();
+//        Integer clusterPort = elastic.getPort();
+//        Integer connectionTimeout = elastic.getConnectionTimeout();
+//        Integer socketTimeout = elastic.getSocketTimeout();
+//        String username = elastic.getUsername();
+//        String password = elastic.getPassword();
+//
+//        // Basic authentication credentials
+//        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+//        credentialsProvider.setCredentials(AuthScope.ANY,
+//                                           new UsernamePasswordCredentials(username, password));
+//
+//        RestHighLevelClient client = new RestHighLevelClient(
+//                RestClient.builder(new HttpHost(clusterHost, clusterPort, clusterScheme))
+//                          .setHttpClientConfigCallback(hacb -> hacb.setDefaultCredentialsProvider(credentialsProvider))
+//                          .setRequestConfigCallback(
+//                                  requestConfigBuilder -> requestConfigBuilder.setConnectTimeout(connectionTimeout)
+//                                                                              .setSocketTimeout(socketTimeout)));
+//
+//        MetricsAppContext.getInstance().setElasticClient(client);
+//    }
 
 //    private void initElasticClient() {
 //        MetricsConfiguration configuration = MetricsAppContext.getInstance().getConfiguration();

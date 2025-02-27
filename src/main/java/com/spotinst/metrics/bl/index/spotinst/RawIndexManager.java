@@ -1,18 +1,22 @@
 package com.spotinst.metrics.bl.index.spotinst;
 
+import com.spotinst.dropwizard.common.exceptions.dal.DalException;
 import com.spotinst.metrics.MetricsAppContext;
 import com.spotinst.metrics.bl.parsers.*;
 import com.spotinst.metrics.commons.configuration.ElasticConfig;
 import com.spotinst.metrics.commons.configuration.IndexNamePatterns;
 import com.spotinst.metrics.dal.models.elastic.requests.ElasticMetricStatisticsRequest;
+import com.spotinst.metrics.dal.models.elastic.responses.ElasticMetricStatisticsResponse;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.TermQueryBuilder;
-import org.elasticsearch.script.Script;
-import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.metrics.SumAggregationBuilder;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.Script;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
+import co.elastic.clients.elasticsearch._types.aggregations.AggregationBuilders;
+import co.elastic.clients.elasticsearch._types.aggregations.SumAggregation;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,34 +57,69 @@ public class RawIndexManager extends BaseIndexManager<ElasticMetricStatisticsReq
     }
 
     // region Filters
+//    @Override
+//    protected BoolQuery createDataOwnershipQuery() {
+//        String           accountId     = request.getAccountId();
+////        BoolQuery retVal        = QueryBuilders.boolQuery();
+//        BoolQuery.Builder retVal = new BoolQuery.Builder();
+//        String           accountIdPath = ACCOUNT_ID_RAW_DIMENSION_NAME;
+//
+//        // If reading from an optimized index created by template, there is no need to append the '.keyword' suffix
+////        if(IS_READ_FROM_OPTIMIZED_INDEX == false) {
+////            accountIdPath += METRIC_KEYWORD_SUFFIX;
+////        }
+//
+////        TermQuery accountIdQuery = QueryBuilders.termQuery(accountIdPath, accountId);
+//        TermQuery accountIdQuery = QueryBuilders.term().field(accountIdPath).value(accountId).build();
+//
+//        retVal.should(accountIdQuery);
+//
+//        return retVal;
+//    }
+
     @Override
-    protected BoolQueryBuilder createDataOwnershipQuery() {
-        String           accountId     = request.getAccountId();
-        BoolQueryBuilder retVal        = QueryBuilders.boolQuery();
-        String           accountIdPath = ACCOUNT_ID_RAW_DIMENSION_NAME;
+    protected BoolQuery createDataOwnershipQuery() {
+        String accountId = request.getAccountId();
+        BoolQuery retVal;
+        String accountIdPath = ACCOUNT_ID_RAW_DIMENSION_NAME;
 
         // If reading from an optimized index created by template, there is no need to append the '.keyword' suffix
-//        if(IS_READ_FROM_OPTIMIZED_INDEX == false) {
-//            accountIdPath += METRIC_KEYWORD_SUFFIX;
-//        }
+        // if (!IS_READ_FROM_OPTIMIZED_INDEX) {
+        //     accountIdPath += METRIC_KEYWORD_SUFFIX;
+        // }
 
-        TermQueryBuilder accountIdQuery = QueryBuilders.termQuery(accountIdPath, accountId);
+        TermQuery.Builder termQueryBuilder = new TermQuery.Builder();
+        termQueryBuilder.field(accountIdPath);
+        termQueryBuilder.value(accountId);
+        TermQuery accountIdQuery = termQueryBuilder.build();
 
-        retVal.should(accountIdQuery);
+        BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
+        boolQueryBuilder.should(s -> s.term(accountIdQuery));
+        retVal = boolQueryBuilder.build();
+
+//        TermQuery accountIdTermQuery = QueryBuilders.term().field(accountIdPath).value(accountId).build();
+//        Query accountIdQuery = new Query.Builder().term(accountIdTermQuery).build();
+
+//        retVal.should(accountIdQuery);
 
         return retVal;
     }
     // endregion
 
     // region Statistics
-    protected AbstractAggregationBuilder createSumStatAggregation() {
+    //TODO Tal It's working well
+    protected Aggregation createSumStatAggregation() {
+        Aggregation retVal;
         String                metricName = request.getMetricName();
-        SumAggregationBuilder retVal     = AggregationBuilders.sum(AGG_METRIC_SUM_NAME);
+        SumAggregation.Builder sumAggBuilder = AggregationBuilders.sum();
 
-        String sumScriptStr = String.format(SUM_AGG_SCRIPT_FORMAT_RAW_INDEX, metricName, metricName);
+        String fieldNameStr = String.format(METRIC_VALUE_FIELD_PATH_FORMAT, metricName);
 
-        Script sumScript = new Script(sumScriptStr);
-        retVal.script(sumScript);
+        sumAggBuilder.field(fieldNameStr);
+
+        SumAggregation sumAgg = sumAggBuilder.build();
+
+        retVal = sumAgg._toAggregation();
 
         return retVal;
     }
@@ -117,7 +156,8 @@ public class RawIndexManager extends BaseIndexManager<ElasticMetricStatisticsReq
 
     @Override
     protected BaseMetricAggregationParser getRangeAggregationParser(String identifier) {
-        return new MetricRangeAggregationParser(identifier, request);
+//        return new MetricRangeAggregationParser(identifier, request);
+        return null;
     }
 
     @Override
@@ -127,7 +167,8 @@ public class RawIndexManager extends BaseIndexManager<ElasticMetricStatisticsReq
 
     @Override
     protected BaseMetricAggregationParser getGroupByAggregationParser(String identifier) {
-        return new MetricGroupByAggregationParser(identifier, request);
+//        return new MetricGroupByAggregationParser(identifier, request);
+        return null;
     }
     // endregion
 }

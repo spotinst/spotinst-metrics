@@ -42,9 +42,9 @@ dependencies {
     implementation(
 //            'com.spotinst:spotinst-dropwizard-v4:4.0.3-SNAPSHOT',
             'com.spotinst:spotinst-dropwizard-v4:4.0.15',
-//            'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.13.4',
-//            'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.16.3',
-            'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.17.0',
+//            'co.elastic.clients:elasticsearch-java:8.17.0',
+            'co.elastic.clients:elasticsearch-java:8.16.1',
+//            'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.17.0',
             'vc.inreach.aws:aws-signing-request-interceptor:0.0.22',
             'com.spotinst:spotinst-messaging:2.0.1',
             'org.hibernate:hibernate-validator:8.0.0.Final',

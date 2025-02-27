@@ -1,5 +1,6 @@
 package com.spotinst.metrics.bl.parsers;
 
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
 import com.spotinst.metrics.bl.parsers.stats.IMetricStatParser;
 import com.spotinst.metrics.bl.parsers.stats.MetricStatsParserFactory;
 import com.spotinst.metrics.commons.enums.MetricStatisticEnum;
@@ -9,7 +10,7 @@ import com.spotinst.metrics.dal.models.elastic.ElasticMetricStatistics;
 import com.spotinst.metrics.dal.models.elastic.requests.ElasticMetricStatisticsRequest;
 import com.spotinst.metrics.dal.services.elastic.infra.AggCompositeKey;
 import org.apache.commons.collections4.CollectionUtils;
-import org.elasticsearch.search.aggregations.Aggregations;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +27,8 @@ public class MetricStatsAggregationParser extends BaseMetricAggregationParser<El
     }
 
     @Override
-    public Map<AggCompositeKey, Aggregations> parse(Map<AggCompositeKey, Aggregations> aggsMapByKeys,
-                                                    Map<String, ElasticMetricAggregations> byRefResultMap) {
+    public Map<AggCompositeKey, Aggregate> parse(Map<AggCompositeKey, Aggregate> aggsMapByKeys,
+                                                 Map<String, ElasticMetricAggregations> byRefResultMap) {
         if (aggsMapByKeys == null || aggsMapByKeys.isEmpty()) {
             String msg = "No aggregations to parse, skipping METRIC STATS aggregation parser";
             LOGGER.debug(msg);
@@ -42,15 +43,15 @@ public class MetricStatsAggregationParser extends BaseMetricAggregationParser<El
                 createMetricKeyToDataPointByTimestampMap(byRefResultMap);
 
         // Next depth map
-        Map<AggCompositeKey, Aggregations> nextDepth = new HashMap<>();
+        Map<AggCompositeKey, Aggregate> nextDepth = new HashMap<>();
 
         for (AggCompositeKey compositeKey : aggsMapByKeys.keySet()) {
             String       metricKey    = compositeKey.getTermKey();
             String       timestampKey = compositeKey.getTimestampKey();
-            Aggregations aggs         = aggsMapByKeys.get(compositeKey);
+            Aggregate aggregate = aggsMapByKeys.get(compositeKey);
 
             // Create metric statistics from elastic search response
-            ElasticMetricStatistics statistics = statParser.parse(aggs);
+            ElasticMetricStatistics statistics = statParser.parse(aggregate);
 
             if (statistics == null) {
                 String msg = "Cannot get elastic search stats [%s] for time [%s], skipping";

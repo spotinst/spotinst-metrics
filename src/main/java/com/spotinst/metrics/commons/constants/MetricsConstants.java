@@ -40,8 +40,9 @@ public class MetricsConstants {
         public static final String SYSTEM_NAMESPACE_NEW = "spotinst/compute";
     }
     public static class MetricScripts {
-        public static final String SUM_AGG_SCRIPT_FORMAT_RAW_INDEX =
-                "doc['metrics.%s.value'].value * doc['metrics.%s.count'].value;";
+//        public static final String SUM_AGG_SCRIPT_FORMAT_RAW_INDEX =
+//                "doc['metrics.%s.value'].value * doc['metrics.%s.count'].value;";
+        public static final String SUM_AGG_SCRIPT_FORMAT_RAW_INDEX =     "metrics.%s.value";
         public static final String AVG_BUCKET_SCRIPT_FORMAT         = "params.%s / params.%s";
         public static final String EMPTY_COUNT_BUCKET_SCRIPT_FORMAT = "params.%s > 0";
 
