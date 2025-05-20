@@ -14,23 +14,25 @@ coreDbToken: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzcG90aW5zdCIsImV4cC
 ##############################################
 #                SERVICES
 ##############################################
-#services:
-##  eventsServiceUrl: http://events-public.dev.spotinst.com:2300
-#  dbServiceUrl: http://db-java-public.dev.spotinst.com:2100
-#  umsServiceUrl: http://ums-public.dev.spotinst.com:4100
+services:
+  ##  eventsServiceUrl: http://events-public.dev.spotinst.com:2300
+  dbServiceUrl: http://db-java-public.dev.spotinst.com:2100
+  umsServiceUrl: http://ums-public.dev.spotinst.com:4100
 
 ##############################################
 #                ELASTIC
 ##############################################
 elastic:
-  scheme: https
-  host: vpc-es-aws-statistics-dev-cl2wtyjjsmb67aia2teaama6eq.us-east-2.es.amazonaws.com
-  port: 443
+  scheme: http
+  host: es-analytics.dev.spotinst.com
+  port: 9200
   # Values in ms
   connectionTimeout: 3000
   socketTimeout: 90000
   clusterRegion: us-east-2
-  indexNameOverriddenPatterns: [ "spot_storage", "azure_stateful_opt", "azure_ocean_opt" ]
+  indexNameOverriddenPatterns: ["spot_storage", "azure_stateful_opt", "azure_ocean_opt" ]
+  username: elastic
+  password: 6631C3Y2id8qXbFJg79xDrU0
 
   indexNamePatterns:
     # Add an index name pattern to be used by the get statistics requests
@@ -41,7 +43,7 @@ elastic:
 
     # Add an index name pattern to be used in the report metrics
     # For optimized index, prefix MUST BE ALIGNED WITH CLUSTER TEMPLATE of 'opt_*'
-#    writePattern: "opt_%s_test"
+    #    writePattern: "opt_%s_test"
     writePattern: "opt_%s"
 
   bulkProcessorIndexer:

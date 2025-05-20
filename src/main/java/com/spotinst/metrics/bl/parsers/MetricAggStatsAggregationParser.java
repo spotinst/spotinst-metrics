@@ -10,19 +10,19 @@ import com.spotinst.metrics.dal.models.elastic.ElasticMetricStatistics;
 import com.spotinst.metrics.dal.models.elastic.requests.ElasticMetricStatisticsRequest;
 import com.spotinst.metrics.dal.services.elastic.infra.AggCompositeKey;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MetricStatsAggregationParser extends BaseMetricAggregationParser<ElasticMetricStatisticsRequest> {
+public class MetricAggStatsAggregationParser extends BaseMetricAggregationParser<ElasticMetricStatisticsRequest> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MetricStatsAggregationParser.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetricAggStatsAggregationParser.class);
 
-    public MetricStatsAggregationParser(String aggregationName, ElasticMetricStatisticsRequest metricStatsRequest) {
+    public MetricAggStatsAggregationParser(String aggregationName, ElasticMetricStatisticsRequest metricStatsRequest) {
         super(aggregationName, metricStatsRequest);
     }
 
@@ -56,15 +56,15 @@ public class MetricStatsAggregationParser extends BaseMetricAggregationParser<El
 
             if (statistics == null) {
                 String msg = "Cannot get elastic search stats [%s] for time [%s], skipping";
-                LOGGER.debug(String.format(msg, aggregationName, timestampKey));
+                LOGGER.warn(String.format(msg, aggregationName, timestampKey));
                 continue;
             }
 
             Map<String, ElasticMetricDatapoint> byTimestamp = dataPointsByTimeStampByMetricKey.get(metricKey);
-            if (MapUtils.isNotEmpty(byTimestamp)) {
-                // When a time interval is used, we need to glue each data point to its relevant time
-                ElasticMetricDatapoint dp = byTimestamp.get(timestampKey);
+            if (byTimestamp != null && byTimestamp.isEmpty() == false) {
 
+                // When a time interval was used, we need to glue each data point to its relevant time
+                ElasticMetricDatapoint dp = byTimestamp.get(timestampKey);
                 if (dp == null) {
                     dp = new ElasticMetricDatapoint();
                 }
@@ -93,8 +93,7 @@ public class MetricStatsAggregationParser extends BaseMetricAggregationParser<El
             }
         }
 
-        LOGGER.debug(
-                String.format("Finished creating response objects for METRIC STATS aggregation [%s]", aggregationName));
+        LOGGER.debug("Finished creating response objects for METRIC STATS aggregation [{}]", aggregationName);
         LOGGER.debug("Reached to the deepest aggregation level, completed.");
 
         // Metric stats should be the leaf of the aggregation tree, returns an empty depth map
@@ -116,7 +115,7 @@ public class MetricStatsAggregationParser extends BaseMetricAggregationParser<El
                 continue;
             }
 
-            Map<String, ElasticMetricDatapoint> dpByTimeStamp = new HashMap<>();
+            Map<String, ElasticMetricDatapoint> dpByTimeStamp = new LinkedHashMap<>();
             datapoints.forEach(dp -> dpByTimeStamp.put(dp.getTimestamp(), dp));
             retVal.put(byRefKey, dpByTimeStamp);
         }

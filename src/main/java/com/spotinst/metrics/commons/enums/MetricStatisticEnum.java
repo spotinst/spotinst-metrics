@@ -7,9 +7,6 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by zachi.nachshon on 2/8/17.
- */
 @Getter
 public enum MetricStatisticEnum {
     AVERAGE("average", "avg"),

@@ -9,8 +9,8 @@ import java.util.Map;
 public interface IMetricAggregationParser {
     String ORIGIN_AGG = "ORIGIN_AGG";
 
-    Map<AggCompositeKey, Aggregate> parse(Map<AggCompositeKey, Aggregate> aggsMapByKeys,
-                                          Map<String, ElasticMetricAggregations> byRefResultMap);
+    Map<AggCompositeKey, Map<String, Aggregate>> parse(Map<AggCompositeKey, Map<String, Aggregate>> aggsMapByKeys,
+                                                       Map<String, ElasticMetricAggregations> byRefResultMap);
 
     String getAggregationName();
 }

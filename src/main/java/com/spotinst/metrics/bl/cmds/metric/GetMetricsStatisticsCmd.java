@@ -12,6 +12,7 @@ import com.spotinst.metrics.bl.repos.RepoManager;
 import com.spotinst.metrics.commons.utils.ContextUtils;
 import com.spotinst.metrics.commons.utils.ElasticMetricTimeUtils;
 import com.spotinst.metrics.commons.utils.ElasticTimeUnit;
+import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +33,7 @@ public class GetMetricsStatisticsCmd extends BaseCmd<BlMetricStatisticsResponse>
     }
 
     public BlMetricStatisticsResponse execute(BlMetricStatisticsRequest request, String index) {
+        BlMetricStatisticsResponse retVal;
 
         LOGGER.debug("Start filtering metric statistics...");
 
@@ -42,19 +44,19 @@ public class GetMetricsStatisticsCmd extends BaseCmd<BlMetricStatisticsResponse>
         ContextUtils.setCtxAccountOnRequest(request);
 
         // Data ownership is being enforced by placing the account id from the context on the elastic search query
-        BlMetricStatisticsResponse retVal;
+
         RepoGenericResponse<BlMetricStatisticsResponse> response =
                 RepoManager.metricRepo.getMetricsStatistics(request, index);
 
-        if (response.isRequestSucceed() == false || response.getValue() == null) {
-            LOGGER.error(String.format("Failed to get metric statistics: %s", request.toString()),
-                         response.getDalErrors());
+        if (BooleanUtils.isFalse(response.isRequestSucceed()) || response.getValue() == null) {
+            LOGGER.error(String.format("Failed to get metric statistics: %s", request), response.getDalErrors());
             throw new BlException(ErrorCodes.FAILED_TO_GET_METRICS_STATISTICS, "Failed to get metric statistics");
         }
 
         LOGGER.debug("Finished filtering metric statistics");
 
         retVal = response.getValue();
+
         return retVal;
     }
 
@@ -67,6 +69,8 @@ public class GetMetricsStatisticsCmd extends BaseCmd<BlMetricStatisticsResponse>
             LOGGER.error(errMsg);
             throw new BlException(ErrorCodes.FAILED_TO_GET_METRICS_STATISTICS, errMsg);
         }
+
+        //todo tal oyar - are we gonna keep the 14 days limition?
 
         // ElasticSearch contains up to 14 indices which represents the last 14 days
         // If request time exceeded the query time limit threshold, we'll be limiting the query time frame

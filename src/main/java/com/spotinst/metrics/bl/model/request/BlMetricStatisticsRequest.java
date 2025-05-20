@@ -23,7 +23,8 @@ public class BlMetricStatisticsRequest {
     private BlMetricRange           range;
     private BlMetricDateRange       dateRange;
 
-    public BlMetricStatisticsRequest() {}
+    public BlMetricStatisticsRequest() {
+    }
 
     @Override
     public String toString() {

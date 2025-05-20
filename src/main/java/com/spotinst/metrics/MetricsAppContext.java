@@ -95,6 +95,7 @@
 
 package com.spotinst.metrics;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import com.spotinst.dropwizard.common.context.BaseAppContext;
 import com.spotinst.metrics.bl.model.BlOrganization;
 import com.spotinst.metrics.commons.configuration.MetricsConfiguration;
@@ -102,12 +103,6 @@ import com.spotinst.metrics.dal.services.elastic.ElasticSearchPercentilesService
 import com.spotinst.metrics.dal.services.elastic.IElasticSearchPercentilesService;
 import com.spotinst.metrics.dal.services.elastic.infra.ElasticSearchService;
 import com.spotinst.metrics.dal.services.elastic.infra.IElasticSearchService;
-import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.transport.ElasticsearchTransport;
-import co.elastic.clients.transport.rest_client.RestClientTransport;
-import co.elastic.clients.json.jackson.JacksonJsonpMapper;
-import org.apache.http.HttpHost;
-import org.elasticsearch.client.RestClient;
 
 import java.math.BigInteger;
 import java.util.Map;
@@ -132,9 +127,9 @@ public class MetricsAppContext extends BaseAppContext<MetricsConfiguration, BlOr
     }
 
     //region Members
-    private Map<BigInteger, BlOrganization> organizations;
-    private ElasticsearchClient elasticClient;
-    private IElasticSearchService elasticSearchService;
+    private Map<BigInteger, BlOrganization>  organizations;
+    private ElasticsearchClient              elasticClient;
+    private IElasticSearchService            elasticSearchService;
     private IElasticSearchPercentilesService elasticSearchPercentilesService;
 
     //endregion
@@ -169,13 +164,13 @@ public class MetricsAppContext extends BaseAppContext<MetricsConfiguration, BlOr
         this.organizations = organizations;
     }
 
+
     public ElasticsearchClient getElasticClient() {
         if (elasticClient == null) {
             // Initialize the elasticClient here
-            RestClient restClient = RestClient.builder(new HttpHost("localhost", 9200)).build();
-            ElasticsearchTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
-            elasticClient = new ElasticsearchClient(transport);
+            elasticClient = ElasticsearchClient.of(b -> b.host("localhost:9200"));
         }
+
         return elasticClient;
     }
 

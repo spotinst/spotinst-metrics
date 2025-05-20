@@ -3,20 +3,20 @@ package com.spotinst.metrics.bl.parsers.stats;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.SumAggregate;
 import com.spotinst.metrics.dal.models.elastic.ElasticMetricStatistics;
-import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
-import co.elastic.clients.elasticsearch._types.aggregations.SumAggregation;
+import org.apache.commons.collections4.MapUtils;
 
-import static com.spotinst.metrics.bl.index.spotinst.BaseIndexManager.roundFix;
-import static com.spotinst.metrics.commons.constants.MetricsConstants.Aggregations.AGG_METRIC_SUM_NAME;
+import java.util.Map;
+
+import static com.spotinst.metrics.bl.index.spotinst.BaseIndexManager2.roundFix;
 
 public class MetricSumParser implements IMetricStatParser {
 
     @Override
-    public ElasticMetricStatistics parse(Aggregate aggregate) {
+    public ElasticMetricStatistics parse(Map<String, Aggregate> aggregateMap) {
         ElasticMetricStatistics retVal = null;
 
-        if (aggregate != null && aggregate._kind() == Aggregate.Kind.Sum) {
-            SumAggregate sumAggregate   = aggregate.sum();
+        if (MapUtils.isNotEmpty(aggregateMap)) {
+            SumAggregate sumAggregate = aggregateMap.get(Aggregate.Kind.Sum.name()).sum();
 
             if (sumAggregate != null) {
                 retVal = new ElasticMetricStatistics();

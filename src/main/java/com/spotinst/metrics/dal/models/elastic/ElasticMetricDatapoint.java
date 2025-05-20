@@ -1,7 +1,7 @@
 package com.spotinst.metrics.dal.models.elastic;
 
 public class ElasticMetricDatapoint {
-    private String             timestamp;
+    private String                  timestamp;
     private ElasticMetricStatistics statistics;
 
     public ElasticMetricDatapoint() {

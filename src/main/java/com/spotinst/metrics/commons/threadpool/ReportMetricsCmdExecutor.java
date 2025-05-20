@@ -22,7 +22,7 @@ public class ReportMetricsCmdExecutor {
 
     public void execute(BaseRunnableExecutor workerThread) {
 
-        Thread.ofVirtual().start(()-> {
+        Thread.ofVirtual().start(() -> {
             executor.execute(workerThread);
         });
     }

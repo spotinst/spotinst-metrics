@@ -1,36 +1,30 @@
 package com.spotinst.metrics.bl.index.custom;
 
+import co.elastic.clients.elasticsearch._types.FieldValue;
+import co.elastic.clients.elasticsearch._types.aggregations.*;
+import co.elastic.clients.elasticsearch._types.query_dsl.*;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.HitsMetadata;
+import co.elastic.clients.elasticsearch.core.search.TotalHits;
 import com.spotinst.dropwizard.common.exceptions.dal.DalException;
 import com.spotinst.metrics.MetricsAppContext;
 import com.spotinst.metrics.commons.configuration.ElasticConfig;
 import com.spotinst.metrics.commons.configuration.IndexNamePatterns;
 import com.spotinst.metrics.commons.configuration.QueryConfig;
-import com.spotinst.metrics.commons.constants.MetricsConstants;
-import com.spotinst.metrics.commons.constants.MetricsConstants.ElasticMetricConstants;
 import com.spotinst.metrics.dal.models.elastic.requests.ElasticDimensionsValuesRequest;
 import com.spotinst.metrics.dal.models.elastic.responses.ElasticDimensionsValuesResponse;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import co.elastic.clients.elasticsearch.core.SearchResponse;
-//import org.elasticsearch.action.search.SearchRequest;
-//import org.elasticsearch.action.search.SearchRequest;
-//import org.elasticsearch.index.query.*;
-import co.elastic.clients.elasticsearch.core.search.HitsMetadata;
-import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
-import co.elastic.clients.elasticsearch._types.aggregations.AggregationBuilders;
-import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
-import co.elastic.clients.elasticsearch._types.aggregations.TermsAggregation;
-import co.elastic.clients.elasticsearch._types.query_dsl.ExistsQuery;
-import co.elastic.clients.elasticsearch._types.query_dsl.TermsQuery;
-import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
-import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
-import co.elastic.clients.elasticsearch.core.SearchRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
 
+import static com.spotinst.metrics.commons.constants.MetricsConstants.Dimension.ACCOUNT_ID_RAW_DIMENSION_NAME;
 import static com.spotinst.metrics.commons.constants.MetricsConstants.Dimension.DIMENSIONS_PATH_PREFIX;
+import static com.spotinst.metrics.commons.constants.MetricsConstants.ElasticMetricConstants.NAMESPACE_FIELD_PATH;
 import static com.spotinst.metrics.commons.constants.MetricsConstants.ElasticMetricConstants.OPTIMIZED_INDEX_PREFIX;
 import static com.spotinst.metrics.commons.constants.MetricsConstants.FieldPath.METRIC_KEYWORD_SUFFIX;
 
@@ -48,17 +42,15 @@ public class DimensionsIndexManager {
     private ElasticDimensionsValuesRequest request;
 
     static {
-        ElasticConfig config = MetricsAppContext.getInstance()
-                                                        .getConfiguration()
-                                                        .getElastic();
+        ElasticConfig config = MetricsAppContext.getInstance().getConfiguration().getElastic();
 
         // By default, service shouldn't read from optimized index (may be changed later on)
         IS_READ_FROM_OPTIMIZED_INDEX = false;
 
         IndexNamePatterns indexNamePatterns = config.getIndexNamePatterns();
-        if(indexNamePatterns != null) {
+        if (indexNamePatterns != null) {
             String readPattern = indexNamePatterns.getReadPattern();
-            if(readPattern != null) {
+            if (readPattern != null) {
                 String idxPrefix = StringUtils.isEmpty(readPattern) ? "" : readPattern;
                 IS_READ_FROM_OPTIMIZED_INDEX = idxPrefix.startsWith(OPTIMIZED_INDEX_PREFIX);
             }
@@ -73,153 +65,157 @@ public class DimensionsIndexManager {
     }
 
     // region Filters
-//    public void setFilters(SearchRequest.Builder srb) throws DalException {
-//        TermsQueryBuilder        namespaceQuery     = createNamespaceQuery();
-//        BoolQueryBuilder         dataOwnershipQuery = createDataOwnershipQuery();
-//        List<ExistsQueryBuilder> existsQueries      = createDimensionsExistsQueries();
-//
-//        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-//
-//        boolQuery.minimumShouldMatch("1");
-//
-//        // Use filter instead of query to benefit from elastic search cache and avoid document scoring
-//        boolQuery.filter(namespaceQuery);
-//
-//        // Add exists queries on requests dimensions keys with OR operator between them
-//        existsQueries.forEach(boolQuery::should);
-//
-//        // Append account id on filter to enforce data ownership
-//        boolQuery = boolQuery.filter(dataOwnershipQuery);
-//
-//        srb.query(boolQuery);
-//
-////        // Queries should use the request cache if possible
-////        srb.setRequestCache(true);
-//
-//        srb.size(0);
-//    }
+    public void setFilters(SearchRequest.Builder srb) throws DalException {
+        TermsQuery        namespaceQuery     = createNamespaceQuery();
+        BoolQuery         dataOwnershipQuery = createDataOwnershipQuery();
+        List<ExistsQuery> existsQueries      = createDimensionsExistsQueries();
 
-//    private List<ExistsQuery> createDimensionsExistsQueries() throws DalException {
-//        List<ExistsQuery> existQueries  = new ArrayList<>();
-//        List<String>             dimensionKeys = request.getDimensionKeys();
-//
-//        if(dimensionKeys == null || dimensionKeys.isEmpty()) {
-//            String errMsg = "dimensions keys are missing in the get metric dimensions request";
-//            LOGGER.error(errMsg);
-//            throw new DalException(errMsg);
-//        }
-//
-//        String format = "%s.%s";
-//        dimensionKeys.forEach(dimKey -> {
-//            String dimName = String.format(format, DIMENSIONS_PATH_PREFIX, dimKey);
-////            ExistsQueryBuilder existsQ = QueryBuilders.existsQuery(dimName);
-//            ExistsQuery.Builder existsQueryBuilder = QueryBuilders.exists();
-//            existsQueryBuilder.field(dimName);
-//            ExistsQuery existsQ = existsQueryBuilder.build();
-//            existQueries.add(existsQ);
-//        });
-//
-//        return existQueries;
-//    }
-//
-//    protected TermsQuery createNamespaceQuery() throws DalException {
-//        TermsQuery retVal;
-//        Set<String>       namespaces   = new HashSet<>();
-//        String            reqNamespace = request.getNamespace();
-//
-//        if(StringUtils.isEmpty(reqNamespace)) {
-//            String errMsg = "[namespace] is missing in the get metric statistics request";
-//            LOGGER.error(errMsg);
-//            throw new DalException(errMsg);
-//        } else {
-//            namespaces.add(reqNamespace);
-//        }
-//
-//        retVal = new TermsQuery(ElasticMetricConstants.NAMESPACE_FIELD_PATH, namespaces);
-//        return retVal;
-//    }
-//
-//    protected BoolQuery createDataOwnershipQuery() {
-//        String           accountId     = request.getAccountId();
-//        BoolQuery retVal        = QueryBuilders.boolQuery();
-//        String           accountIdPath = MetricsConstants.Dimension.ACCOUNT_ID_RAW_DIMENSION_NAME;
-//
-//        // If reading from an optimized index created by template, there is no need to append the '.keyword' suffix
-//        //        if(IS_READ_FROM_OPTIMIZED_INDEX == false) {
-//        //            accountIdPath += METRIC_KEYWORD_SUFFIX;
-//        //        }
-//
-//        //        TermQueryBuilder accountIdQuery = QueryBuilders.termQuery(accountIdPath + METRIC_KEYWORD_SUFFIX, accountId);
-//        TermQueryBuilder accountIdQuery = QueryBuilders.termQuery(accountIdPath, accountId);
-//
-//        retVal.should(accountIdQuery);
-//
-//        return retVal;
-//    }
+        BoolQuery.Builder boolQueryBuilder = QueryBuilders.bool().minimumShouldMatch("1");
+
+        // Use filter instead of query to benefit from elastic search cache and avoid document scoring
+        boolQueryBuilder.filter(f -> f.terms(namespaceQuery));
+
+        // Add exists queries on requests dimensions keys with OR operator between them
+        boolQueryBuilder.should(existsQueries.stream().map(ExistsQuery::_toQuery).toList());
+
+        // Append account ID on filter to enforce data ownership
+        if (dataOwnershipQuery != null) {
+            boolQueryBuilder.filter(b -> b.bool(dataOwnershipQuery));
+        }
+
+        srb.query(f -> f.bool(boolQueryBuilder.build()));
+
+        // Queries should use the request cache if possible
+        srb.requestCache(true);
+
+        // Do not return documents, we care about the aggregation content
+        srb.size(0);
+    }
+
+    private List<ExistsQuery> createDimensionsExistsQueries() throws DalException {
+        List<ExistsQuery> existQueries  = new ArrayList<>();
+        List<String>      dimensionKeys = request.getDimensionKeys();
+
+        if (dimensionKeys == null || dimensionKeys.isEmpty()) {
+            String errMsg = "dimensions keys are missing in the get metric dimensions request";
+            LOGGER.error(errMsg);
+            throw new DalException(errMsg);
+        }
+
+        String format = "%s.%s";
+        dimensionKeys.forEach(dimKey -> {
+            String      dimensionField = String.format(format, DIMENSIONS_PATH_PREFIX, dimKey);
+            ExistsQuery existsQuery    = QueryBuilders.exists().field(dimensionField).build();
+            existQueries.add(existsQuery);
+        });
+
+        return existQueries;
+    }
+
+    protected BoolQuery createDataOwnershipQuery() {
+        BoolQuery retVal;
+
+        String accountId     = request.getAccountId();
+        String accountIdPath = ACCOUNT_ID_RAW_DIMENSION_NAME;
+
+        //todo tal - probably need to always add the keyword suffix from now on
+        // it was only added when reading from non-optimized index - but seems like it should be added always now.
+
+        // If reading from an optimized index created by template, there is no need to append the '.keyword' suffix
+        if (IS_READ_FROM_OPTIMIZED_INDEX) {
+            accountIdPath += METRIC_KEYWORD_SUFFIX;
+        }
+
+        Query accountIdQuery = QueryBuilders.term().field(accountIdPath).value(accountId).build()._toQuery();
+
+        retVal = QueryBuilders.bool().should(accountIdQuery).build();
+
+        return retVal;
+    }
+
+    protected TermsQuery createNamespaceQuery() throws DalException {
+        TermsQuery retVal;
+        String     reqNamespace = request.getNamespace();
+
+        if (StringUtils.isEmpty(reqNamespace)) {
+            String errMsg = "[namespace] is missing in the get metric statistics request";
+            LOGGER.error(errMsg);
+            throw new DalException(errMsg);
+        }
+
+        retVal = QueryBuilders.terms().field(NAMESPACE_FIELD_PATH).terms(termsBuilder -> termsBuilder.value(
+                Collections.singletonList(FieldValue.of(reqNamespace)))).build();
+
+        return retVal;
+    }
     // endregion
 
     // region Aggregations
-//    public void setAggregations(SearchRequest.Builder srb)
-//            throws DalException, IOException {
-//
-//        List<String> dimensionKeys = request.getDimensionKeys();
-//
-//        if(dimensionKeys != null && dimensionKeys.isEmpty() == false) {
-//            String dimensionPathFormat = "%s.%s";
-//            for (String dimensionName : dimensionKeys) {
-//                if (StringUtils.isEmpty(dimensionName) == false) {
-//                    TermsAggregationBuilder dimAgg = AggregationBuilders.terms(dimensionName);
-//                    dimAgg.minDocCount(1);
-//                    dimAgg.shardMinDocCount(1);
-//                    dimAgg.size(DIMENSIONS_VALUES_RESULT_PER_BUCKET_LIMIT);
-//
-//                    String fieldPath = String.format(dimensionPathFormat, DIMENSIONS_PATH_PREFIX, dimensionName);
-//                    dimAgg.field(fieldPath);
-//
-//                    srb.aggregation(dimAgg);
-//                }
-//            }
-//        }
-//    }
+    public void setAggregations(SearchRequest.Builder srb) throws DalException, IOException {
+        List<String> dimensionKeys = request.getDimensionKeys();
+
+        if (CollectionUtils.isNotEmpty(dimensionKeys)) {
+            String dimensionPathFormat = "%s.%s";
+            for (String dimensionKey : dimensionKeys) {
+                if (StringUtils.isNotEmpty(dimensionKey)) {
+                    String fieldPath = String.format(dimensionPathFormat, DIMENSIONS_PATH_PREFIX, dimensionKey);
+                    TermsAggregation dimAgg = AggregationBuilders.terms().minDocCount(1).shardMinDocCount(1L)
+                                                                 .size(DIMENSIONS_VALUES_RESULT_PER_BUCKET_LIMIT)
+                                                                 .field(fieldPath).build();
+
+                    srb.aggregations(dimensionKey, dimAgg._toAggregation());
+                }
+            }
+        }
+    }
     // endregion
 
     // region Parse Response
-//    public ElasticDimensionsValuesResponse parseResponse(SearchResponse searchResponse) throws DalException {
-//        List<String>               dimensionKeys = request.getDimensionKeys();
-//        SearchHits                 searchHits    = searchResponse.getHits();
-//        ElasticDimensionsValuesResponse retVal        = null;
-//
-//        if(searchHits.getTotalHits().value > 0) {
-//            Map<String, Set<Object>> resultMap      = new HashMap<>();
-//            Aggregations             allBucketsAggs = searchResponse.getAggregations();
-//
-//            // Create a Map structure with dimensions as keys and empty linked list as values
-//            dimensionKeys.forEach(d -> resultMap.put(d, new HashSet<>()));
-//
-//            for (String dimensionKey : dimensionKeys) {
-//                Aggregation bucketAgg = allBucketsAggs.get(dimensionKey);
-//                if (bucketAgg != null) {
-//                    Set<Object>              dimValuesResultSet = resultMap.get(dimensionKey);
-//                    ParsedStringTerms        bucketsTerms       = (ParsedStringTerms) bucketAgg;
-////                    List<ParsedStringTerms.ParsedBucket> terms              = bucketsTerms.getBuckets();
-//                    List<? extends Terms.Bucket> terms = bucketsTerms.getBuckets();
-//
-//                    if(terms != null && terms.isEmpty() == false) {
-//                        terms.forEach(t -> {
-//                            Object dimensionValue = t.getKey();
-//                            if(dimensionValue != null ) {
-//                                dimValuesResultSet.add(dimensionValue);
-//                            }
-//                        });
-//                    }
-//                }
-//            }
-//
-//            retVal = new ElasticDimensionsValuesResponse();
-//            retVal.setDimensions(resultMap);
-//        }
-//
-//        return retVal;
-//    }
+    public ElasticDimensionsValuesResponse parseResponse(
+            SearchResponse<ElasticDimensionsValuesResponse> searchResponse) throws DalException {
+        ElasticDimensionsValuesResponse retVal = new ElasticDimensionsValuesResponse();
+
+        List<String>                                  dimensionKeys = request.getDimensionKeys();
+        HitsMetadata<ElasticDimensionsValuesResponse> outerHits     = searchResponse.hits();
+
+        TotalHits totalHits = outerHits.total();
+        LOGGER.debug(String.format("Search Response Total Hits: [%s]", totalHits));
+
+        if (Objects.isNull(totalHits) || totalHits.value() == 0) {
+            LOGGER.debug("No matches returned from elastic search, returning an empty response");
+            return retVal;
+        }
+
+        Map<String, Set<Object>> resultMap      = new HashMap<>();
+        Map<String, Aggregate>   allBucketsAggs = searchResponse.aggregations();
+
+        // Create a Map structure with dimensions as keys and empty linked list as values
+        dimensionKeys.forEach(d -> resultMap.put(d, new HashSet<>()));
+
+        for (String dimensionKey : dimensionKeys) {
+            Aggregate bucketAgg = allBucketsAggs.get(dimensionKey);
+
+            if (Objects.nonNull(bucketAgg)) {
+                Set<Object>             dimValuesResultSet = resultMap.get(dimensionKey);
+                StringTermsAggregate    bucketsTerms       = bucketAgg.sterms();
+                List<StringTermsBucket> buckets            = bucketsTerms.buckets().array();
+
+                if (CollectionUtils.isNotEmpty(buckets)) {
+                    buckets.forEach(t -> {
+                        Object dimensionValue = t.key();
+
+                        if (dimensionValue != null) {
+                            dimValuesResultSet.add(dimensionValue);
+                        }
+                    });
+                }
+            }
+        }
+
+        retVal = new ElasticDimensionsValuesResponse();
+        retVal.setDimensions(resultMap);
+
+        return retVal;
+    }
     // endregion
 }

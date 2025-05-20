@@ -10,6 +10,9 @@ import lombok.Setter;
 @Getter
 public class MetricsConfiguration extends BaseApplicationConfiguration {
     //region Members
+    @Valid
+    @NotNull
+    private ServicesConfig services;
 
     @Valid
     @NotNull
@@ -23,6 +26,10 @@ public class MetricsConfiguration extends BaseApplicationConfiguration {
     @NotNull
     private QueryConfig queryConfig;
 
+    //todo tal oyar - do we need the metadaCache? seems like it was only being used by lb-core.
+    //    @Valid
+    //    @NotNull
+    //    private MetadataCacheConfig metadataCache;
     //endregion
 
 }

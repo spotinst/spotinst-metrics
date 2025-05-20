@@ -11,7 +11,8 @@ import static com.spotinst.dropwizard.common.constants.ServiceConstants.Filters.
 @Priority(PRIORITY_INBOUND_RESOURCE_AUTH_FILTER)
 public class MetricsAuthRequestFilter extends BaseAuthenticationRequestFilter {
 
-    public MetricsAuthRequestFilter() {}
+    public MetricsAuthRequestFilter() {
+    }
 
     @Override
     protected FilterOptions getFilterOptions() {

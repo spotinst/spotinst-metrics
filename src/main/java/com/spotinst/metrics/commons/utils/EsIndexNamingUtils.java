@@ -21,7 +21,7 @@ public class EsIndexNamingUtils {
 
     // Index name format
     private static final String DATED_INDEX_NAME_FORMAT = "metrics-%s";
-//    private static final String DATED_INDEX_NAME_FORMAT = "%s";
+    //    private static final String DATED_INDEX_NAME_FORMAT = "%s";
     private static final String INDEX_TIME_PATTERN      = "yyyy.MM.dd";
 
     // Index name patterns for read/write actions
@@ -30,30 +30,28 @@ public class EsIndexNamingUtils {
     private static String AGG_READ_INDEX_NAME_PATTERN;
 
     static {
-        ElasticConfig config = MetricsAppContext.getInstance()
-                                                .getConfiguration()
-                                                .getElastic();
+        ElasticConfig config = MetricsAppContext.getInstance().getConfiguration().getElastic();
         WRITE_INDEX_NAME_PATTERN = "%s";
         READ_INDEX_NAME_PATTERN = "%s";
 
         IndexNamePatterns indexNamePatterns = config.getIndexNamePatterns();
 
-        if(indexNamePatterns != null) {
+        if (indexNamePatterns != null) {
             String writePattern = indexNamePatterns.getWritePattern();
 
-            if(StringUtils.isEmpty(writePattern) == false) {
+            if (StringUtils.isEmpty(writePattern) == false) {
                 WRITE_INDEX_NAME_PATTERN = writePattern;
             }
 
             String readPattern = indexNamePatterns.getReadPattern();
 
-            if(StringUtils.isEmpty(readPattern) == false) {
+            if (StringUtils.isEmpty(readPattern) == false) {
                 READ_INDEX_NAME_PATTERN = readPattern;
             }
 
             String aggReadPattern = indexNamePatterns.getAggregationReadPattern();
 
-            if(StringUtils.isEmpty(aggReadPattern) == false) {
+            if (StringUtils.isEmpty(aggReadPattern) == false) {
                 AGG_READ_INDEX_NAME_PATTERN = aggReadPattern;
             }
         }
@@ -61,7 +59,7 @@ public class EsIndexNamingUtils {
 
     public static String generateDailyIndexName(String index) {
         Boolean useWriteIndexNameFormat = true;
-        String retVal = generateDailyIndexName(useWriteIndexNameFormat, index);
+        String  retVal                  = generateDailyIndexName(useWriteIndexNameFormat, index);
         return retVal;
     }
 
@@ -70,7 +68,7 @@ public class EsIndexNamingUtils {
 
         String useFormat;
 
-        if(index == null) {
+        if (index == null) {
             useFormat = useWriteIndexPattern ? WRITE_INDEX_NAME_PATTERN : READ_INDEX_NAME_PATTERN;
         }
         else {
@@ -91,7 +89,7 @@ public class EsIndexNamingUtils {
     private static String generateOverriddenIndex(String index) {
         String retVal;
 
-        if(index.endsWith("_%s") == false) {
+        if (index.endsWith("_%s") == false) {
             index = index + "-%s";
         }
 
@@ -105,21 +103,23 @@ public class EsIndexNamingUtils {
         return generateIndicesByDateRange(dateRange, index, useAggregationIndex);
     }
 
-    public static List<String> generateIndicesByDateRange(ElasticMetricDateRange dateRange, String index, Boolean useAggregationIndex) {
+    public static List<String> generateIndicesByDateRange(ElasticMetricDateRange dateRange, String index,
+                                                          Boolean useAggregationIndex) {
         List<String>     retVal;
         SimpleDateFormat formatter = new SimpleDateFormat(INDEX_TIME_PATTERN);
         Date             from      = dateRange.getFrom();
         Date             to        = dateRange.getTo();
 
-        if(dateRange == null) {
+        //todo tal oyar - this cannot be null since we always take the from and to, we use it even in the else???
+        if (dateRange == null) {
             Boolean useWriteIndexNameFormat = false;
-            String idxName = generateDailyIndexName(useWriteIndexNameFormat, index);
+            String  idxName                 = generateDailyIndexName(useWriteIndexNameFormat, index);
             retVal = new ArrayList<>(Collections.singletonList(idxName));
         }
         else {
             String readIndexPattern = null;
 
-            if(index == null) {
+            if (index == null) {
                 readIndexPattern = useAggregationIndex ? AGG_READ_INDEX_NAME_PATTERN : READ_INDEX_NAME_PATTERN;
             }
             else {
@@ -137,6 +137,7 @@ public class EsIndexNamingUtils {
             String currDate;
             String idxName;
             String idxNameWithDate;
+
             for (DateTime date = fromTime; date.isBeforeNow(); date = date.plusDays(1)) {
                 currDate = formatter.format(date.toDate());
                 idxNameWithDate = String.format(DATED_INDEX_NAME_FORMAT, currDate);
@@ -148,10 +149,12 @@ public class EsIndexNamingUtils {
             idxName = String.format(readIndexPattern, idxNameWithDate);
             datesSet.add(idxName);
 
-            LOGGER.debug(String.format("Successfully generated [%s] indices for date range [%s] - [%s]", datesSet.size(),
-                                       from.toString(), to.toString()));
+            LOGGER.debug(
+                    String.format("Successfully generated [%s] indices for date range [%s] - [%s]", datesSet.size(),
+                                  from, to));
 
-            retVal = new ArrayList<>(datesSet);        }
+            retVal = new ArrayList<>(datesSet);
+        }
 
         return retVal;
     }

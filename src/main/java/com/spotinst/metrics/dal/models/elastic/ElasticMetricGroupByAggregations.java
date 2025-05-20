@@ -1,21 +1,21 @@
 package com.spotinst.metrics.dal.models.elastic;
 
-import co.elastic.clients.elasticsearch._types.aggregations.TermsAggregation;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 
 import java.util.List;
 
 public class ElasticMetricGroupByAggregations {
-    List<TermsAggregation> groupByAggsOrder;
+    List<Aggregation.Builder> groupByAggsOrder;
 
-    public ElasticMetricGroupByAggregations(List<TermsAggregation> groupByAggsOrder) {
+    public ElasticMetricGroupByAggregations(List<Aggregation.Builder> groupByAggsOrder) {
         this.groupByAggsOrder = groupByAggsOrder;
     }
 
-    public List<TermsAggregation> getGroupByAggsOrder() {
+    public List<Aggregation.Builder> getGroupByAggsOrder() {
         return groupByAggsOrder;
     }
 
-    public void setGroupByAggsOrder(List<TermsAggregation> groupByAggsOrder) {
+    public void setGroupByAggsOrder(List<Aggregation.Builder> groupByAggsOrder) {
         this.groupByAggsOrder = groupByAggsOrder;
     }
 }

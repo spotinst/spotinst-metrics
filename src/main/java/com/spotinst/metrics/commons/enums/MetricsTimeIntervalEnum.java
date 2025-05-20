@@ -77,8 +77,7 @@ public enum MetricsTimeIntervalEnum {
 
         if (retVal == null) {
             LOGGER.error(
-                    String.format("Tried to report metrics statistics enum for: %s, but we don't support such type",
-                                  name));
+                    String.format("Tried to create time interval enum for: %s, but we don't support such type", name));
         }
 
         return retVal;

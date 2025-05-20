@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
-//TODO Tal: Maybe I can delete it
 public class ExecutorUtils {
     //region Members
     private static final Logger LOGGER = LoggerFactory.getLogger(ExecutorUtils.class);

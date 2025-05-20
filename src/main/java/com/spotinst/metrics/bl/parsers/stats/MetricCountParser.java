@@ -1,26 +1,26 @@
 package com.spotinst.metrics.bl.parsers.stats;
 
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
-import co.elastic.clients.elasticsearch._types.aggregations.AvgAggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.ValueCountAggregate;
 import com.spotinst.metrics.dal.models.elastic.ElasticMetricStatistics;
-import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
-import co.elastic.clients.elasticsearch._types.aggregations.SumAggregate;
+import org.apache.commons.collections4.MapUtils;
 
-import static com.spotinst.metrics.bl.index.spotinst.BaseIndexManager.roundFix;
-import static com.spotinst.metrics.commons.constants.MetricsConstants.Aggregations.AGG_METRIC_COUNT_NAME;
+import java.util.Map;
+
+import static com.spotinst.metrics.bl.index.spotinst.BaseIndexManager2.roundFix;
 
 public class MetricCountParser implements IMetricStatParser {
 
     @Override
-    public ElasticMetricStatistics parse(Aggregate aggregate) {
+    public ElasticMetricStatistics parse(Map<String, Aggregate> aggregateMap) {
         ElasticMetricStatistics retVal = null;
 
-        if (aggregate != null && aggregate._kind() == Aggregate.Kind.Sum) {
-            SumAggregate sumAggregate = aggregate.sum();
+        if (MapUtils.isNotEmpty(aggregateMap)) {
+            ValueCountAggregate valueCount = aggregateMap.get(Aggregate.Kind.ValueCount.name()).valueCount();
 
-            if (sumAggregate != null) {
+            if (valueCount != null) {
                 retVal = new ElasticMetricStatistics();
-                retVal.setAverage(roundFix(sumAggregate.value(), 10));
+                retVal.setCount(roundFix(valueCount.value(), 10));
             }
         }
 

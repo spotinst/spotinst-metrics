@@ -1,23 +1,27 @@
 package com.spotinst.metrics.bl.parsers.stats;
 
-import co.elastic.clients.elasticsearch._types.aggregations.*;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.MaxAggregate;
 import com.spotinst.metrics.dal.models.elastic.ElasticMetricStatistics;
+import org.apache.commons.collections4.MapUtils;
 
-import static com.spotinst.metrics.bl.index.spotinst.BaseIndexManager.roundFix;
-import static com.spotinst.metrics.commons.constants.MetricsConstants.Aggregations.AGG_METRIC_MAX_NAME;
+import java.util.Map;
+
+import static com.spotinst.metrics.bl.index.spotinst.BaseIndexManager2.roundFix;
 
 public class MetricMaxParser implements IMetricStatParser {
 
     @Override
-    public ElasticMetricStatistics parse(Aggregate aggregate) {
-        ElasticMetricStatistics retVal  = null;
+    public ElasticMetricStatistics parse(Map<String, Aggregate> aggregateMap) {
+        ElasticMetricStatistics retVal = null;
 
-        if (aggregate != null && aggregate._kind() == Aggregate.Kind.Max) {
-            MaxAggregate maxAggregate = aggregate.max();
+        if (MapUtils.isNotEmpty(aggregateMap)) {
+
+            MaxAggregate maxAggregate = aggregateMap.get(Aggregate.Kind.Max.name()).max();
 
             if (maxAggregate != null) {
                 retVal = new ElasticMetricStatistics();
-                retVal.setAverage(roundFix(maxAggregate.value(), 10));
+                retVal.setMaximum(roundFix(maxAggregate.value(), 10));
             }
         }
 

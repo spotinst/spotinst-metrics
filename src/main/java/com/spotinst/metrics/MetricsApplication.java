@@ -1,22 +1,9 @@
 package com.spotinst.metrics;
 
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.google.common.base.Supplier;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.elasticsearch.client.RestClientBuilder;
-//import org.elasticsearch.client.RestHighLevelClient;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.transport.rest_client.RestClientTransport;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.elasticsearch.client.RestClient;
+import co.elastic.clients.transport.rest5_client.Rest5ClientTransport;
+import co.elastic.clients.transport.rest5_client.low_level.Rest5Client;
 import com.spotinst.commons.exceptions.ApplicationRequirementsException;
 import com.spotinst.commons.mapper.entities.registration.BaseMappingRegistration;
 import com.spotinst.dropwizard.common.context.BaseAppContext;
@@ -31,26 +18,26 @@ import com.spotinst.metrics.api.filters.auth.InboundAuthFeature;
 import com.spotinst.metrics.api.resources.app.MetricsResource;
 import com.spotinst.metrics.commons.configuration.ElasticConfig;
 import com.spotinst.metrics.commons.configuration.MetricsConfiguration;
+import com.spotinst.metrics.dal.services.elastic.infra.ElasticSearchService;
 import io.dropwizard.jobs.Job;
 import io.dropwizard.servlets.tasks.Task;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequestInterceptor;
-import org.elasticsearch.client.RestClient;
-//import org.elasticsearch.client.RestHighLevelClient;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
+import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
+import org.apache.hc.core5.util.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vc.inreach.aws.request.AWSSigner;
-import vc.inreach.aws.request.AWSSigningRequestInterceptor;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 public class MetricsApplication extends BaseApplication<MetricsConfiguration, TokenPayLoad> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MetricsApplication.class);
+    private static final Logger  LOGGER                  = LoggerFactory.getLogger(MetricsApplication.class);
+    private static final Boolean TRANSPORT_SNIFF_DEFAULT = false;
 
     // region Entry Point
     public static void main(String[] args) throws Exception {
@@ -72,6 +59,7 @@ public class MetricsApplication extends BaseApplication<MetricsConfiguration, To
         return apiResources;
     }
 
+    //TODO TAL OYAR - null was returned in the original code
     //TODO Tal: Maybe I should return null
     @Override
     protected List<Task> getAdminTasks() {
@@ -113,101 +101,46 @@ public class MetricsApplication extends BaseApplication<MetricsConfiguration, To
     @Override
     protected void postApplicationStart() throws Exception {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-
+        MetricsAppContext.getInstance().setElasticSearchService(new ElasticSearchService());
         executePostStartupCommands();
     }
 
     private void executePostStartupCommands() throws ApplicationRequirementsException {
-        initElasticClient();
+        //initElasticClient();
     }
 
+    //todo tal oyar - we initilize in BaseElasticSearchService
     private void initElasticClient() {
         MetricsConfiguration configuration = MetricsAppContext.getInstance().getConfiguration();
-        ElasticConfig elastic = configuration.getElastic();
+        ElasticConfig        elastic       = configuration.getElastic();
 
-        String clusterScheme = elastic.getScheme();
-        String clusterHost = elastic.getHost();
-        Integer clusterPort = elastic.getPort();
+        String  clusterScheme     = elastic.getScheme();
+        String  clusterHost       = elastic.getHost();
+        Integer clusterPort       = elastic.getPort();
+        String  clusterName       = elastic.getClusterName();
         Integer connectionTimeout = elastic.getConnectionTimeout();
-        Integer socketTimeout = elastic.getSocketTimeout();
-        String username = elastic.getUsername();
-        String password = elastic.getPassword();
+        Integer socketTimeout     = elastic.getSocketTimeout();
+        String  username          = elastic.getUsername();
+        String  password          = elastic.getPassword();
+        String url = String.format("%s://%s:%d", clusterScheme, clusterHost, clusterPort);
 
-        // Basic authentication credentials
-        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        credentialsProvider.setCredentials(AuthScope.ANY,
-                                           new UsernamePasswordCredentials(username, password));
+        //todo tal oyar - sniffing is not supported in the new client?
+        Boolean sniff = elastic.getTransportSniff() != null ? elastic.getTransportSniff() : TRANSPORT_SNIFF_DEFAULT;
 
-        // Create the low-level client
-        RestClient restClient = RestClient.builder(new HttpHost(clusterHost, clusterPort, clusterScheme))
-                                          .setHttpClientConfigCallback(hacb -> hacb.setDefaultCredentialsProvider(credentialsProvider))
-                                          .setRequestConfigCallback(
-                                                  requestConfigBuilder -> requestConfigBuilder.setConnectTimeout(connectionTimeout)
-                                                                                              .setSocketTimeout(socketTimeout))
-                                          .build();
+        // Initialize the elasticClient here
+        //todo tal - seems like the response timeout is the socket timeout? no clear documentation on this im not sure.
+        RequestConfig.Builder requestConfigBuilder =
+                RequestConfig.custom().setConnectionRequestTimeout(Timeout.of(connectionTimeout, TimeUnit.MILLISECONDS))
+                             .setResponseTimeout(socketTimeout, TimeUnit.MILLISECONDS);
 
-        // Create the transport with a Jackson mapper
-        RestClientTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
+        CloseableHttpAsyncClient httpclient =
+                HttpAsyncClients.custom().setDefaultRequestConfig(requestConfigBuilder.build()).build();
 
-        // And create the API client
-        ElasticsearchClient client = new ElasticsearchClient(transport);
+        Rest5Client rest5Client = Rest5Client.builder(URI.create(url)).setHttpClient(httpclient).build();
 
-        MetricsAppContext.getInstance().setElasticClient(client);
+        Rest5ClientTransport rest5ClientTransport = new Rest5ClientTransport(rest5Client, new JacksonJsonpMapper());
+        ElasticsearchClient  elasticsearchClient  = new ElasticsearchClient(rest5ClientTransport);
+
+        MetricsAppContext.getInstance().setElasticClient(elasticsearchClient);
     }
-
-//    private void initElasticClient() {
-//        MetricsConfiguration configuration = MetricsAppContext.getInstance().getConfiguration();
-//        ElasticConfig elastic = configuration.getElastic();
-//
-//        String clusterScheme = elastic.getScheme();
-//        String clusterHost = elastic.getHost();
-//        Integer clusterPort = elastic.getPort();
-//        Integer connectionTimeout = elastic.getConnectionTimeout();
-//        Integer socketTimeout = elastic.getSocketTimeout();
-//        String username = elastic.getUsername();
-//        String password = elastic.getPassword();
-//
-//        // Basic authentication credentials
-//        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-//        credentialsProvider.setCredentials(AuthScope.ANY,
-//                                           new UsernamePasswordCredentials(username, password));
-//
-//        RestHighLevelClient client = new RestHighLevelClient(
-//                RestClient.builder(new HttpHost(clusterHost, clusterPort, clusterScheme))
-//                          .setHttpClientConfigCallback(hacb -> hacb.setDefaultCredentialsProvider(credentialsProvider))
-//                          .setRequestConfigCallback(
-//                                  requestConfigBuilder -> requestConfigBuilder.setConnectTimeout(connectionTimeout)
-//                                                                              .setSocketTimeout(socketTimeout)));
-//
-//        MetricsAppContext.getInstance().setElasticClient(client);
-//    }
-
-//    private void initElasticClient() {
-//        MetricsConfiguration configuration = MetricsAppContext.getInstance().getConfiguration();
-//        ElasticConfig        elastic       = configuration.getElastic();
-//
-//        String  clusterScheme     = elastic.getScheme();
-//        String  clusterHost       = elastic.getHost();
-//        Integer clusterPort       = elastic.getPort();
-//        Integer connectionTimeout = elastic.getConnectionTimeout();
-//        Integer socketTimeout     = elastic.getSocketTimeout();
-//
-//        //sign with aws signature for internal security communication
-//        Supplier<LocalDateTime> clock               = () -> LocalDateTime.now(ZoneOffset.UTC);
-//        AWSCredentialsProvider  credentialsProvider = new DefaultAWSCredentialsProviderChain();
-//
-//
-//        AWSSigner signer = new AWSSigner(credentialsProvider, elastic.getClusterRegion(), "es", clock);
-//
-//        HttpRequestInterceptor interceptor = new AWSSigningRequestInterceptor(signer);
-//
-//        RestHighLevelClient client = new RestHighLevelClient(
-//                RestClient.builder(new HttpHost(clusterHost, clusterPort, clusterScheme))
-//                          .setHttpClientConfigCallback(hacb -> hacb.addInterceptorLast(interceptor))
-//                          .setRequestConfigCallback(
-//                                  requestConfigBuilder -> requestConfigBuilder.setConnectTimeout(connectionTimeout)
-//                                                                              .setSocketTimeout(socketTimeout)));
-//
-//        MetricsAppContext.getInstance().setElasticClient(client);
-//    }
 }

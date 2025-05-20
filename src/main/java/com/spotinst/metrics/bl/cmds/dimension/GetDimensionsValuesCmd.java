@@ -7,18 +7,21 @@ import com.spotinst.metrics.MetricsAppContext;
 import com.spotinst.metrics.bl.errors.ErrorCodes;
 import com.spotinst.metrics.bl.model.request.BlDimensionsValuesRequest;
 import com.spotinst.metrics.bl.model.response.BlDimensionsValuesResponse;
+import com.spotinst.metrics.bl.model.response.BlMetricStatisticsResponse;
 import com.spotinst.metrics.bl.repos.RepoManager;
 import com.spotinst.metrics.commons.configuration.QueryConfig;
 import com.spotinst.metrics.commons.utils.ContextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.spotinst.metrics.commons.constants.MetricsConstants.Namespace.BALANCER_NAMESPACE_NEW;
-
-public class GetDimensionsValuesCmd extends BaseCmd<BlDimensionsValuesResponse> {
+/**
+ * Created by zachi.nachshon on 1/17/17.
+ */
+public class GetDimensionsValuesCmd extends BaseCmd<BlMetricStatisticsResponse> {
     private static final Logger LOGGER = LoggerFactory.getLogger(GetDimensionsValuesCmd.class);
 
     private static Integer DIMENSIONS_KEYS_REQUEST_LIMIT;
@@ -37,7 +40,7 @@ public class GetDimensionsValuesCmd extends BaseCmd<BlDimensionsValuesResponse> 
         LOGGER.info("Start fetching dimensions values...");
 
         // Validate namespace does not contain 'spotinst/balancer' prefix
-//        validateNamespace(request);
+        // validateNamespace(request);
 
         // Validate the amount of unique dimensions does not exceed the configurable value
         validateDimensionKeysAmount(request);
@@ -46,11 +49,12 @@ public class GetDimensionsValuesCmd extends BaseCmd<BlDimensionsValuesResponse> 
         ContextUtils.setCtxAccountOnRequest(request);
 
         // Data ownership is being enforced by placing the account id from the context on the elastic search query
-        BlDimensionsValuesResponse                      retVal;
-        RepoGenericResponse<BlDimensionsValuesResponse> response = RepoManager.metricRepo.getDimensionsValues(request, index);
+        BlDimensionsValuesResponse retVal;
+        RepoGenericResponse<BlDimensionsValuesResponse> response =
+                RepoManager.metricRepo.getDimensionsValues(request, index);
 
         if (response.isRequestSucceed() == false || response.getValue() == null) {
-            LOGGER.error(String.format("Failed to get dimensions values: %s", request.toString()),
+            LOGGER.error("Failed to get dimensions values: {}. Errors: {}", request.toString(),
                          response.getDalErrors());
             throw new BlException(ErrorCodes.FAILED_TO_GET_DIMENSIONS_VALUES, "Failed to get dimensions values");
         }
@@ -62,23 +66,12 @@ public class GetDimensionsValuesCmd extends BaseCmd<BlDimensionsValuesResponse> 
     }
 
     private void validateDimensionKeysAmount(BlDimensionsValuesRequest request) {
-        Set<String> dimKeysDistinct = request.getDimensionKeys().stream().distinct().collect(Collectors.toSet());
+        Set<String> dimKeysDistinct = new HashSet<>(request.getDimensionKeys());
         int         dimKeysAmount   = dimKeysDistinct.size();
 
         if (dimKeysAmount > DIMENSIONS_KEYS_REQUEST_LIMIT) {
             String errFormat = "Reached the limit of allowed dimension values per request, limit is [%s]";
             String errMsg    = String.format(errFormat, DIMENSIONS_KEYS_REQUEST_LIMIT);
-            LOGGER.error(errMsg);
-            throw new BlException(ErrorCodes.FAILED_TO_GET_DIMENSIONS_VALUES, errMsg);
-        }
-    }
-
-    private void validateNamespace(BlDimensionsValuesRequest request) {
-        String namespaceLC = request.getNamespace().toLowerCase();
-
-        if(namespaceLC.startsWith(BALANCER_NAMESPACE_NEW)) {
-            String format = "Namespaces starting with [%s] are reserved";
-            String errMsg = String.format(format, BALANCER_NAMESPACE_NEW);
             LOGGER.error(errMsg);
             throw new BlException(ErrorCodes.FAILED_TO_GET_DIMENSIONS_VALUES, errMsg);
         }
