@@ -26,7 +26,7 @@ repositories {
 }
 
 // The main class of the application
-mainClassName = 'com.spotinst.service.MetricsApplication'
+mainClassName = 'com.spotinst.MetricsApplication'
 
 dependencies {
 
