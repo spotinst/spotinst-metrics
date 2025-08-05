@@ -12,9 +12,15 @@ def pod = renderPod(
 
 def svcName = currentBuild.rawBuild.project.parent.displayName
 def clouds = ['aws']
+def defaultBranch = 'main'
+def prodDeployType = 'k8s'
+def additionalDeployments = []
 
 javaMCPipeline(
     svcName,
     pod,
-    clouds
+    clouds,
+    defaultBranch,
+    additionalDeployments,
+    prodDeployType
 )
