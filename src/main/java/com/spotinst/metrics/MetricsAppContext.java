@@ -7,7 +7,7 @@
 //import com.spotinst.metrics.dal.services.elastic.IElasticSearchPercentilesService;
 //import com.spotinst.metrics.dal.services.elastic.infra.ElasticSearchService;
 //import com.spotinst.metrics.dal.services.elastic.infra.IElasticSearchService;
-////import org.elasticsearch.client.RestHighLevelClient;
+/// /import org.elasticsearch.client.RestHighLevelClient;
 //import co.elastic.clients.transport.rest_client.RestClientTransport;
 //
 //import java.math.BigInteger;
@@ -78,9 +78,9 @@
 //        this.elasticClient = elasticClient;
 //    }
 //
-////    public IElasticSearchService getElasticSearchService() {
-////        return elasticSearchService;
-////    }
+/// /    public IElasticSearchService getElasticSearchService() {
+/// /        return elasticSearchService;
+/// /    }
 //
 //    public void setElasticSearchService(IElasticSearchService elasticSearchService) {
 //        this.elasticSearchService = elasticSearchService;
@@ -96,19 +96,17 @@
 package com.spotinst.metrics;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._helpers.bulk.BulkIngester;
 import com.spotinst.dropwizard.common.context.BaseAppContext;
 import com.spotinst.metrics.bl.model.BlOrganization;
 import com.spotinst.metrics.commons.configuration.MetricsConfiguration;
-import com.spotinst.metrics.dal.services.elastic.ElasticSearchPercentilesService;
-import com.spotinst.metrics.dal.services.elastic.IElasticSearchPercentilesService;
-import com.spotinst.metrics.dal.services.elastic.infra.ElasticSearchService;
-import com.spotinst.metrics.dal.services.elastic.infra.IElasticSearchService;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigInteger;
 import java.util.Map;
 
 public class MetricsAppContext extends BaseAppContext<MetricsConfiguration, BlOrganization> {
-
     private static MetricsAppContext instance;
 
     private MetricsAppContext() {
@@ -127,33 +125,16 @@ public class MetricsAppContext extends BaseAppContext<MetricsConfiguration, BlOr
     }
 
     //region Members
-    private Map<BigInteger, BlOrganization>  organizations;
-    private ElasticsearchClient              elasticClient;
-    private IElasticSearchService            elasticSearchService;
-    private IElasticSearchPercentilesService elasticSearchPercentilesService;
-
+    private Map<BigInteger, BlOrganization> organizations;
+    @Setter
+    @Getter
+    private ElasticsearchClient             elasticClient;
+    @Getter
+    @Setter
+    private BulkIngester<Object>            bulkIngester;
     //endregion
 
-    // Method to get the ElasticSearchService
-    public IElasticSearchService getElasticSearchService() {
-        if (elasticSearchService == null) {
-            // Initialize the elasticSearchService here
-            elasticSearchService = new ElasticSearchService(); // Ensure this is a valid instance
-        }
-        return elasticSearchService;
-    }
-
-    // Method to get the ElasticSearchPercentilesService
-    public IElasticSearchPercentilesService getElasticSearchPercentilesService() {
-        if (elasticSearchPercentilesService == null) {
-            // Initialize the elasticSearchPercentilesService here
-            elasticSearchPercentilesService = new ElasticSearchPercentilesService(); // Ensure this is a valid instance
-        }
-        return elasticSearchPercentilesService;
-    }
-
     //region Getters and Setters
-
     @Override
     public Map<BigInteger, BlOrganization> getOrganizations() {
         return organizations;
@@ -163,29 +144,6 @@ public class MetricsAppContext extends BaseAppContext<MetricsConfiguration, BlOr
     public void setOrganizations(Map<BigInteger, BlOrganization> organizations) {
         this.organizations = organizations;
     }
-
-
-    public ElasticsearchClient getElasticClient() {
-        if (elasticClient == null) {
-            // Initialize the elasticClient here
-            elasticClient = ElasticsearchClient.of(b -> b.host("localhost:9200"));
-        }
-
-        return elasticClient;
-    }
-
-    public void setElasticClient(ElasticsearchClient elasticClient) {
-        this.elasticClient = elasticClient;
-    }
-
-    public void setElasticSearchService(IElasticSearchService elasticSearchService) {
-        this.elasticSearchService = elasticSearchService;
-    }
-
-    public void setElasticSearchPercentilesService(IElasticSearchPercentilesService elasticSearchPercentilesService) {
-        this.elasticSearchPercentilesService = elasticSearchPercentilesService;
-    }
-
     //endregion
 }
 

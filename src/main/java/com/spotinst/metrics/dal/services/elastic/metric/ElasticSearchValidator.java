@@ -24,7 +24,7 @@
 //            GetIndexResponse response = client.indices().get(request, RequestOptions.DEFAULT);
 //            return response.getIndices().length > 0;
 //        } catch (ElasticsearchStatusException e) {
-////            LOGGER.error("ElasticsearchStatusException: Unable to parse response body", e);
+/// /            LOGGER.error("ElasticsearchStatusException: Unable to parse response body", e);
 //            return false;
 //        } catch (Exception e) {
 ////            LOGGER.error("Exception: Error checking if index exists", e);

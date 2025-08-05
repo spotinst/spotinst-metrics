@@ -6,19 +6,18 @@ import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import java.util.Set;
+import java.util.List;
 
 @Data
 public class ElasticConfig {
     //region Members
-    private String            scheme;
-    private Integer           connectionTimeout;
-    private Integer           socketTimeout;
-    private String            clusterRegion;
-    private IndexNamePatterns indexNamePatterns;
-    private Set<String>       indexNameOverriddenPatterns;
-    private String            username;
-    private String            password;
+    private String             scheme;
+    private Integer            connectionTimeout;
+    private Integer            socketTimeout;
+    private String             clusterRegion;
+    private List<ElasticIndex> indexes;
+    private String             username;
+    private String             password;
 
     @NotNull
     private String host;

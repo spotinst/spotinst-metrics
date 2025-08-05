@@ -8,10 +8,6 @@ import lombok.Setter;
 
 import java.util.List;
 
-/**
- * Created by Tal.Geva on 07/08/2024.
- */
-
 @Setter
 @Getter
 @JsonIgnoreProperties(ignoreUnknown = true)

@@ -36,7 +36,7 @@ public class ElasticMetricTimeUtils {
     public static Long getDiffByTimeUnit(Date older, Date newer, TimeUnit unit) {
         Long retVal;
 
-        switch(unit) {
+        switch (unit) {
             case MINUTES: {
                 Long differenceInMinutes = TimeUnit.MINUTES.toMinutes(newer.getTime() - older.getTime());
                 retVal = TimeUnit.MILLISECONDS.toMinutes(differenceInMinutes);
@@ -63,7 +63,7 @@ public class ElasticMetricTimeUtils {
     /**
      * Create an ES time unit with 'from' and 'to' fields by using the time unit and offset
      *
-     * @param unit time unit
+     * @param unit   time unit
      * @param offset offset from 'now'
      * @return ES time unit
      */
@@ -77,13 +77,13 @@ public class ElasticMetricTimeUtils {
      * Create an ES time unit with 'from' and 'to' fields by using the time unit and offset
      *
      * @param endDate the starting date to calculate the offset by
-     * @param unit time unit
-     * @param offset offset from starting time
+     * @param unit    time unit
+     * @param offset  offset from starting time
      * @return time unit
      */
     public static ElasticTimeUnit createOffsetTimeUnit(Date endDate, TimeUnit unit, Integer offset) {
         ElasticTimeUnit retVal     = null;
-        Boolean    foundValue = true;
+        Boolean         foundValue = true;
 
         Calendar instance = Calendar.getInstance();
         instance.setTime(endDate);
@@ -110,7 +110,7 @@ public class ElasticMetricTimeUtils {
             }
         }
 
-        if(foundValue) {
+        if (foundValue) {
             Date   startDateRounded = instance.getTime();
             String nowFormatted     = dateToString(endDateRounded);
             String fromFormatted    = dateToString(startDateRounded);
@@ -146,7 +146,7 @@ public class ElasticMetricTimeUtils {
             }
         }
 
-        if(foundValue) {
+        if (foundValue) {
             retVal = cal.getTime();
         }
 
@@ -156,7 +156,7 @@ public class ElasticMetricTimeUtils {
     public static int getMinuteOfDate(Date date) {
         int minuteOfHour = 0;
 
-        if(date != null) {
+        if (date != null) {
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(date);
             minuteOfHour = calendar.get(Calendar.MINUTE);
@@ -168,7 +168,7 @@ public class ElasticMetricTimeUtils {
     public static Date roundSeconds(Date date) {
         Date retVal = null;
 
-        if(date != null) {
+        if (date != null) {
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(date);
             calendar.set(Calendar.SECOND, 0);

@@ -32,17 +32,17 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.container.AsyncResponse;
 import jakarta.ws.rs.container.Suspended;
 import jakarta.ws.rs.core.MediaType;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.util.Objects;
 
 import static com.spotinst.metrics.commons.constants.MetricsConstants.Resources.METRICS_RESOURCE_PATH;
 
-/**
- * Created by Tal.Geva on 07/08/2024
- */
 @Path(METRICS_RESOURCE_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 public class MetricsResource {
@@ -72,8 +72,8 @@ public class MetricsResource {
 
     @POST
     @Path("/query")
-    public ServiceResponseItems getMetricsStatistics(@Valid ApiMetricStatisticsRequest request,
-                                                     @OverriddenIndexValidation @QueryParam("index") String index) {
+    public ServiceResponseItems<ApiMetricStatisticsResponse> getMetricsStatistics(
+            @Valid ApiMetricStatisticsRequest request, @OverriddenIndexValidation @QueryParam("index") String index) {
         LOGGER.debug("Start fetching metric statistics...");
 
         BlMetricStatisticsRequest req = MetricStatisticConverter.toBl(request);
@@ -81,15 +81,13 @@ public class MetricsResource {
         GetMetricsStatisticsCmd    cmd      = new GetMetricsStatisticsCmd();
         BlMetricStatisticsResponse response = cmd.execute(req, index);
 
-        ServiceResponseItems retVal = new ServiceResponseItems(KIND_GET_STATISTICS);
+        ServiceResponseItems<ApiMetricStatisticsResponse> retVal = new ServiceResponseItems<>(KIND_GET_STATISTICS);
 
-        if (response != null && response.isEmpty() == false) {
+        if (Objects.nonNull(response) && CollectionUtils.isNotEmpty(response.getAggregations())) {
             ApiMetricStatisticsResponse resp = MetricReportConverter.blToApi(response);
             retVal.add(resp);
+
             LOGGER.debug("Finished fetching metric statistics");
-        }
-        else {
-            LOGGER.warn("Failed to get metric statistics");
         }
 
         return retVal;
@@ -97,8 +95,9 @@ public class MetricsResource {
 
     @POST
     @Path("/query/dimensions")
-    public ServiceResponseItems getDimensionsValues(@Valid ApiDimensionsValuesRequest request,
-                                                    @OverriddenIndexValidation @QueryParam("index") String index) throws IOException {
+    public ServiceResponseItems<ApiDimensionsValuesResponse> getDimensionsValues(
+            @Valid ApiDimensionsValuesRequest request,
+            @OverriddenIndexValidation @QueryParam("index") String index) throws IOException {
         LOGGER.info("Start fetching dimensions values...");
 
         BlDimensionsValuesRequest req = DimensionsValuesConverter.toBl(request);
@@ -106,14 +105,16 @@ public class MetricsResource {
         GetDimensionsValuesCmd     cmd      = new GetDimensionsValuesCmd();
         BlDimensionsValuesResponse response = cmd.execute(req, index);
 
-        ServiceResponseItems retVal = new ServiceResponseItems(KIND_GET_DIMENSION_VALUES);
+        ServiceResponseItems<ApiDimensionsValuesResponse> retVal =
+                new ServiceResponseItems<>(KIND_GET_DIMENSION_VALUES);
 
-        if (response != null && response.isEmpty() == false) {
+        if (Objects.nonNull(response) && MapUtils.isNotEmpty(response.getDimensions())) {
             ApiDimensionsValuesResponse resp = DimensionsValuesConverter.toApi(response);
             retVal.add(resp);
         }
 
         LOGGER.info("Finished fetching dimensions values");
+
         return retVal;
     }
 

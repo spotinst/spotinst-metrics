@@ -20,18 +20,17 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class GetMetricsStatisticsCmd extends BaseCmd<BlMetricStatisticsResponse> {
-
+    //region Members
     private static final Logger LOGGER = LoggerFactory.getLogger(GetMetricsStatisticsCmd.class);
+    //endregion
 
-    private static Integer QUERY_TIME_LIMIT_IN_DAYS;
-
+    //region Constructor
     public GetMetricsStatisticsCmd() {
         super(null, null);
-
-        QUERY_TIME_LIMIT_IN_DAYS =
-                MetricsAppContext.getInstance().getConfiguration().getQueryConfig().getQueryTimeLimitInDays();
     }
+    //endregion
 
+    //region Public Methods
     public BlMetricStatisticsResponse execute(BlMetricStatisticsRequest request, String index) {
         BlMetricStatisticsResponse retVal;
 
@@ -44,11 +43,10 @@ public class GetMetricsStatisticsCmd extends BaseCmd<BlMetricStatisticsResponse>
         ContextUtils.setCtxAccountOnRequest(request);
 
         // Data ownership is being enforced by placing the account id from the context on the elastic search query
-
         RepoGenericResponse<BlMetricStatisticsResponse> response =
                 RepoManager.metricRepo.getMetricsStatistics(request, index);
 
-        if (BooleanUtils.isFalse(response.isRequestSucceed()) || response.getValue() == null) {
+        if (BooleanUtils.isFalse(response.isRequestSucceed())) {
             LOGGER.error(String.format("Failed to get metric statistics: %s", request), response.getDalErrors());
             throw new BlException(ErrorCodes.FAILED_TO_GET_METRICS_STATISTICS, "Failed to get metric statistics");
         }
@@ -59,29 +57,33 @@ public class GetMetricsStatisticsCmd extends BaseCmd<BlMetricStatisticsResponse>
 
         return retVal;
     }
+    //endregion
+
 
     private void validateRequestTimeLimitations(BlMetricStatisticsRequest blMetStatsRequest) {
         BlMetricDateRange dateRange = blMetStatsRequest.getDateRange();
+        Integer queryTimeLimitInDays =
+                MetricsAppContext.getInstance().getConfiguration().getQueryConfig().getQueryTimeLimitInDays();
 
         // Enforce time boundaries limitation to prevent over stressing elastic search when searching in all indexes
         if (dateRange == null || dateRange.getFrom() == null || dateRange.getTo() == null) {
             String errMsg = "Cannot get statistics without time boundaries, must supply [dateRange]";
             LOGGER.error(errMsg);
+
             throw new BlException(ErrorCodes.FAILED_TO_GET_METRICS_STATISTICS, errMsg);
         }
-
-        //todo tal oyar - are we gonna keep the 14 days limition?
 
         // ElasticSearch contains up to 14 indices which represents the last 14 days
         // If request time exceeded the query time limit threshold, we'll be limiting the query time frame
         Long daysToQuery = ElasticMetricTimeUtils.getDiffByTimeUnitFromNow(dateRange.getFrom(), TimeUnit.DAYS);
-        if (daysToQuery != null && daysToQuery > QUERY_TIME_LIMIT_IN_DAYS) {
+
+        if (daysToQuery != null && daysToQuery > queryTimeLimitInDays) {
             String errFormat = "Query request exceeds time boundaries limit of %s days, querying on last %s days";
-            String errMsg    = String.format(errFormat, QUERY_TIME_LIMIT_IN_DAYS, QUERY_TIME_LIMIT_IN_DAYS);
+            String errMsg    = String.format(errFormat, queryTimeLimitInDays, queryTimeLimitInDays);
             LOGGER.warn(errMsg);
 
             ElasticTimeUnit newOffset =
-                    ElasticMetricTimeUtils.createOffsetTimeUnitFromNow(TimeUnit.DAYS, QUERY_TIME_LIMIT_IN_DAYS);
+                    ElasticMetricTimeUtils.createOffsetTimeUnitFromNow(TimeUnit.DAYS, queryTimeLimitInDays);
 
             Date newFromDate = newOffset.getFromDate();
             Date newToDate   = newOffset.getToDate();

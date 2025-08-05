@@ -12,9 +12,9 @@ import java.util.List;
 @Setter
 public class ElasticPercentilesRequest {
     //region Members
-    private String                        accountId;
-    private String                       namespace;
-    private List<ElasticMetricDimension>  dimensions;
+    private String                             accountId;
+    private String                             namespace;
+    private List<ElasticMetricDimension>       dimensions;
     private ElasticMetricDateRange             dateRange;
     private List<ElasticPercentileAggregation> percentiles;
     private Boolean                            filterZeroes;

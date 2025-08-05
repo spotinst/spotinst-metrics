@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spotinst.commons.mapper.json.JsonMapper;
 import com.spotinst.dropwizard.common.exceptions.dal.DalException;
+import com.spotinst.metrics.MetricsAppContext;
 import com.spotinst.metrics.bl.index.custom.DimensionsIndexManager;
 import com.spotinst.metrics.bl.index.spotinst.RawIndexManager;
 import com.spotinst.metrics.commons.utils.ElasticMetricTimeUtils;
@@ -37,19 +38,19 @@ import static co.elastic.clients.elasticsearch._types.SearchType.QueryThenFetch;
 import static com.spotinst.metrics.commons.utils.EsIndexNamingUtils.generateDailyIndexName;
 import static com.spotinst.metrics.commons.utils.EsIndexNamingUtils.generateIndicesByDateRange;
 
-public class ElasticMetricService implements IElasticMetricService {
+public class ElasticMetricService {
+    //region Members
     private static final Logger LOGGER = LoggerFactory.getLogger(ElasticMetricService.class);
 
-    private ElasticsearchClient elasticsearchClient;
-    private BulkIngester<Void>  bulkIngester;
+    private final BulkIngester<Object> bulkIngester;
+    private final ElasticsearchClient  elasticsearchClient;
+    //endregion
 
-    //region Constructor
-    public ElasticMetricService(ElasticsearchClient elasticsearchClient, BulkIngester bulkIngester) {
-        this.elasticsearchClient = elasticsearchClient;
-        this.bulkIngester = bulkIngester;
+    public ElasticMetricService() {
+        elasticsearchClient = MetricsAppContext.getInstance().getElasticClient();
+        bulkIngester = MetricsAppContext.getInstance().getBulkIngester();
     }
 
-    //endregion
     //region Private Methods
     private void indexBulk(List<String> documents, String index) throws DalException {
         String       idxName      = generateDailyIndexName(index);
@@ -60,10 +61,10 @@ public class ElasticMetricService implements IElasticMetricService {
                 LOGGER.debug("About to async bulk index the following document [{}] on elasticSearch on index [{}].",
                              document, idxName);
 
-                Map<String, Object> jsonMap = objectMapper.readValue(document, new TypeReference<>() {
+                Map<String, Object> jsonDocsByTypeMap = objectMapper.readValue(document, new TypeReference<>() {
                 });
 
-                bulkIngester.add((op -> op.index(idx -> idx.index(idxName).document(jsonMap))));
+                bulkIngester.add((op -> op.index(idxOps -> idxOps.index(idxName).document(jsonDocsByTypeMap))));
             }
             catch (Exception e) {
                 String errorMessage =
@@ -74,10 +75,25 @@ public class ElasticMetricService implements IElasticMetricService {
             }
         }
     }
+
+    private String logIndicesNames(List<String> indices) {
+        StringBuilder sb = new StringBuilder();
+
+        if (CollectionUtils.isNotEmpty(indices)) {
+            for (String idx : indices) {
+                sb.append(idx).append(", ");
+            }
+        }
+
+        String retVal = sb.toString();
+
+        LOGGER.debug(String.format("Starting to fetch metrics statistics from indices [%s]...", retVal));
+
+        return retVal;
+    }
     //endregion
 
     //region Public Methods
-    @Override
     public ElasticMetricReportResponse reportMetrics(List<ElasticMetricDocument> esMetricDocuments,
                                                      String index) throws DalException {
         ElasticMetricReportResponse retVal = new ElasticMetricReportResponse();
@@ -89,7 +105,7 @@ public class ElasticMetricService implements IElasticMetricService {
         }
         else {
             int docCount = esMetricDocuments.size();
-            LOGGER.debug(String.format("Start reporting [%s] metrics data to elastic search...", docCount));
+            LOGGER.debug("Start reporting [{}] metrics data to elastic search.", docCount);
 
             List<String> documents = new ArrayList<>();
 
@@ -107,29 +123,7 @@ public class ElasticMetricService implements IElasticMetricService {
 
             indexBulk(documents, index);
 
-            //            if (Objects.nonNull(bulkRequest)) {
-            //                try {
-            //                    bulkResponse = elasticsearchClient.bulk(bulkRequest);
-            //                }
-            //                catch (Exception e) {
-            //                    String errorMessage =
-            //                            String.format("Failed to report metrics to elastic search. Request: %s. Exception: %s",
-            //                                          bulkRequest, e);
-            //                    LOGGER.error(errorMessage);
-            //                    throw new DalException(errorMessage, e);
-            //                }
-            //            }
-            //
-            //            if (bulkResponse.errors()) {
-            //                //todo tal oyar -  Should we go through all the items and check for error reason and print those?
-            //                // will provide visibility but can be excessive.
-            //                String errorMessage = "Failed to report metrics to elastic search.";
-            //                LOGGER.error(errorMessage);
-            //                throw new DalException(errorMessage);
-            //            }
-            // else {
-
-            LOGGER.debug(String.format("Finished bulk indexing [%s] metrics to elastic search", documents.size()));
+            LOGGER.debug("Finished bulk indexing [{}] metrics to elastic search", documents.size());
 
             ElasticMetricResultStatus status = new ElasticMetricResultStatus();
             status.setCode(200);
@@ -140,7 +134,6 @@ public class ElasticMetricService implements IElasticMetricService {
         return retVal;
     }
 
-    @Override
     public ElasticDimensionsValuesResponse getDimensionsValues(ElasticDimensionsValuesRequest request,
                                                                String index) throws DalException {
 
@@ -161,14 +154,14 @@ public class ElasticMetricService implements IElasticMetricService {
                                 .searchType(QueryThenFetch).explain(false);
 
             List<String> dimensionKeys = request.getDimensionKeys();
-            if (dimensionKeys != null && dimensionKeys.isEmpty() == false) {
+            if (CollectionUtils.isNotEmpty(dimensionKeys)) {
                 // It is important to distinct the requested dimension keys to prevent ElasticSearch aggregation builder error
                 // Cannot construct two aggregations with the same name
                 List<String> distinctDimKeys = dimensionKeys.stream().distinct().collect(Collectors.toList());
                 request.setDimensionKeys(distinctDimKeys);
             }
 
-            DimensionsIndexManager manager = new DimensionsIndexManager(request);
+            DimensionsIndexManager manager = new DimensionsIndexManager(request, index);
 
             // Set request query
             manager.setFilters(searchRequestBuilder);
@@ -201,25 +194,10 @@ public class ElasticMetricService implements IElasticMetricService {
         return retVal;
     }
 
-    private String logIndicesNames(String[] indices) {
-        StringBuilder sb = new StringBuilder();
-        if (indices != null && indices.length > 0) {
-            for (String idx : indices) {
-                sb.append(idx).append(", ");
-            }
-        }
-
-        String retVal = sb.toString();
-        LOGGER.debug(String.format("Starting to fetch metrics statistics from indices [%s]...", retVal));
-
-        return retVal;
-    }
-    //endregion
-
-    @Override
     public ElasticMetricStatisticsResponse getMetricsStatistics(ElasticMetricStatisticsRequest request,
                                                                 String index) throws DalException {
         ElasticMetricStatisticsResponse retVal;
+
         try {
             ElasticMetricDateRange dateRange    = request.getDateRange();
             List<String>           indices      = generateIndicesByDateRange(dateRange, index);
@@ -229,14 +207,11 @@ public class ElasticMetricService implements IElasticMetricService {
             searchRequestBuilder.ignoreUnavailable(true).allowNoIndices(true).expandWildcards(Open)
                                 .searchType(QueryThenFetch).explain(false).index(indices);
 
-            RawIndexManager manager = new RawIndexManager(request);
+            RawIndexManager manager = new RawIndexManager(request, index);
 
             // Set request query
             manager.setFilters(searchRequestBuilder);
             manager.setAggregations(searchRequestBuilder);
-
-            //            ExistsQuery existsQuery = new ExistsQuery.Builder().field("accountId").build();
-            //           SearchRequest searchRequest2 = new SearchRequest.Builder().index("opt_metrics-2025.05.07").query(q-> q.match(m-> m.field()).exists(existsQuery)).build();
 
             SearchRequest searchRequest = searchRequestBuilder.build();
 
@@ -247,85 +222,26 @@ public class ElasticMetricService implements IElasticMetricService {
 
             long endTime = System.currentTimeMillis();
 
+            //todo tal should i rep;ace that with response.getTook().millis() ?
             LOGGER.info(String.format("Elastic search query on indices [%s] took [%s]ms", indicesNames,
                                       (endTime - startTime)));
+
+            LOGGER.info(String.format("Elastic search query on indices [%s] took [%s]ms", indicesNames,
+                                      (searchResponse.took())));
 
             // Parse elastic search response
             retVal = manager.parseResponse(searchResponse);
         }
         catch (Exception ex) {
-            String errFormat = "Failed getting metric statistics from elastic search for request: %s";
-            String errMsg    = String.format(errFormat, request.toString());
+            String errMsg = String.format("Failed getting metric statistics from elastic search for request: %s",
+                                          request.toString());
             LOGGER.error(errMsg, ex);
             throw new DalException(errMsg, ex);
         }
 
-        LOGGER.debug("Finished fetching metrics statistics by request filter");
+        LOGGER.debug("Finished fetching metrics statistics by request filter.");
 
         return retVal;
     }
-
-    //todo tal oyar - only being used in the LB resource.
-
-    //    @Override
-    //    public ElasticMetricStatisticsResponse getAggregatedMetricsStatistics(ElasticMetricStatisticsRequest request)
-    //            throws DalException {
-    //        ElasticMetricStatisticsResponse retVal;
-    //        Boolean                    useAggregationIndex = true;
-    //
-    //        try {
-    //            ElasticMetricDateRange dateRange = request.getDateRange();
-    //            List<String> indices = EsIndexNamingUtils.generateIndicesByDateRange(dateRange, null, useAggregationIndex);
-    //            String indicesNames = logIndicesNames(indices);
-    //
-    //
-    //            SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder();
-    //            searchRequestBuilder.ignoreUnavailable(true).allowNoIndices(true).expandWildcards(Open)
-    //                                .searchType(QueryThenFetch).explain(false).index(indices);
-    //
-    //
-    //            AggregationIndexManager manager = new AggregationIndexManager(request);
-    //
-    //            // Set request query
-    //            manager.setFilters(srb);
-    //            manager.setAggregations(srb);
-    //
-    //            // Execute
-    //            StopWatch sw = new StopWatch();
-    //            sw.start();
-    //            SearchResponse searchResponse = srb.get();
-    //            sw.stop();
-    //            LOGGER.info(String.format("Elastic search query on indices [%s] on type [%s] took [%s]ms",
-    //                                      indicesNames, DEFAULT_DOC_TYPE, sw.totalTime().millis()));
-    //
-    //            retVal = manager.parseResponse(searchResponse);
-    //
-    //        } catch(Exception ex) {
-    //            String errorMessage = String.format("Failed getting metric statistics from elastic search for request: %s",
-    //                                                request.toString());
-    //            LOGGER.error(errorMessage, ex);
-    //            throw new DalException(errorMessage, ex);
-    //        }
-    //
-    //        LOGGER.debug("Finished fetching metrics statistics by request filter");
-    //
-    //        return retVal;
-    //    }
-
-
-    private String logIndicesNames(List<String> indices) {
-        StringBuilder sb = new StringBuilder();
-
-        if (indices != null && indices.size() > 0) {
-            for (String idx : indices) {
-                sb.append(idx).append(", ");
-            }
-        }
-
-        String retVal = sb.toString();
-
-        LOGGER.debug(String.format("Starting to fetch metrics statistics from indices [%s]...", retVal));
-
-        return retVal;
-    }
+    //endregion
 }

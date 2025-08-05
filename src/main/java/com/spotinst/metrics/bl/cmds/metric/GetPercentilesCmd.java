@@ -16,13 +16,6 @@ public class GetPercentilesCmd {
 
     //region Members
     private static final Logger                           LOGGER = LoggerFactory.getLogger(GetPercentilesCmd.class);
-    private              IElasticSearchPercentilesService elasticSearchPercentilesService;
-    //endregion
-
-    //region Constructors
-    public GetPercentilesCmd() {
-        this.elasticSearchPercentilesService = MetricsAppContext.getInstance().getElasticSearchPercentilesService();
-    }
     //endregion
 
     //region Public Methods

@@ -1,0 +1,35 @@
+{
+  "index_patterns": ["test_index*"],
+  "priority": 100,
+  "template": {
+    "settings": {
+      "index": {
+        "refresh_interval": "10s",
+        "number_of_shards": 3,
+        "number_of_replicas": 1
+      }
+    },
+    "mappings": {
+      "dynamic_templates": [
+        {
+          "strings_as_keywords_only": {
+            "match_mapping_type": "string",
+            "match": "*",
+            "mapping": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        }
+      ],
+      "properties": {
+        "timestamp": {
+          "type": "date"
+        }
+      }
+    }
+  },
+  "version": 1,
+  "_meta": {
+    "description": "Test index - all strings as keywords for aggregations"  }
+}

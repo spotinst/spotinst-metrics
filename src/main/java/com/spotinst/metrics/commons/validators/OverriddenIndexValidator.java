@@ -1,6 +1,7 @@
 package com.spotinst.metrics.commons.validators;
 
 import com.spotinst.metrics.MetricsAppContext;
+import com.spotinst.metrics.commons.configuration.ElasticIndex;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.collections4.CollectionUtils;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Yarden Eisenberg
@@ -43,11 +45,10 @@ public class OverriddenIndexValidator implements ConstraintValidator<OverriddenI
             if (object instanceof List) {
                 setListExceptionMessage(constraintValidatorContext);
             }
-            else if (object instanceof String) {
-                String index = (String) object;
-
-                Set<String> allowedOverriddenPatterns = MetricsAppContext.getInstance().getConfiguration().getElastic()
-                                                                         .getIndexNameOverriddenPatterns();
+            else if (object instanceof String index) {
+                Set<String> allowedOverriddenPatterns =
+                        MetricsAppContext.getInstance().getConfiguration().getElastic().getIndexes().stream()
+                                         .map(ElasticIndex::getName).collect(Collectors.toSet());
 
                 if (CollectionUtils.isEmpty(allowedOverriddenPatterns) ||
                     BooleanUtils.isFalse(allowedOverriddenPatterns.contains(index))) {

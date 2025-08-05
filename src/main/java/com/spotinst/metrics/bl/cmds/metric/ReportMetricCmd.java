@@ -40,17 +40,10 @@ public class ReportMetricCmd {
             RepoGenericResponse<BlMetricReportResponse> reportResponse =
                     RepoManager.metricRepo.report(blRequest, index);
 
-            if (reportResponse.isRequestSucceed() || reportResponse.getValue() != null) {
+            if (reportResponse.isRequestSucceed() && reportResponse.getValue() != null) {
                 retVal = reportResponse.getValue();
 
                 LOGGER.debug("Finished reporting metrics data");
-
-                //todo tal oyar - no need for it right?
-
-                // Async update metric metadata cache after metrics handed over to the ES bulk processor
-                // Must be after indexing phase in order to avoid java.util.ConcurrentModificationException due to
-                // iteration on same documents from within the update metadata & report metrics flows
-                //     updateMetricMetadataCache(accountId, blRequest);
             }
             else {
                 String errorMsg = "Failed to report metrics";
@@ -63,11 +56,4 @@ public class ReportMetricCmd {
         }
         return retVal;
     }
-
-    //todo tal oyar VERIFY - seems like no need for this. the cache is only used for lb-core.
-
-    //        private void updateMetricMetadataCache(String accountId, BlMetricReportRequest request) {
-    //            UpdateMetricMetadataCacheRunnable runnable = new UpdateMetricMetadataCacheRunnable(accountId, request);
-    //            UpdateMetricMetadataCacheExecutor.getInstance().execute(runnable);
-    //        }
 }

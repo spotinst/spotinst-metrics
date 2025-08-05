@@ -54,7 +54,7 @@ public enum MetricStatisticEnum {
 
         for (MetricStatisticEnum metricStatisticEnum : MetricStatisticEnum.values()) {
             if (name.equalsIgnoreCase(
-                    metricStatisticEnum.getValue())) { //TODO Tal:Maybe need to check shorten value too
+                    metricStatisticEnum.getValue())) {
                 retVal = metricStatisticEnum;
                 break;
             }

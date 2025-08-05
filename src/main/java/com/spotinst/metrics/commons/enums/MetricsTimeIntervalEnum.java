@@ -68,8 +68,7 @@ public enum MetricsTimeIntervalEnum {
         MetricsTimeIntervalEnum retVal = null;
 
         for (MetricsTimeIntervalEnum metricsTimeIntervalEnum : MetricsTimeIntervalEnum.values()) {
-            if (name.equalsIgnoreCase(
-                    metricsTimeIntervalEnum.getName())) { //TODO Tal: Need to verify that get name is the case
+            if (name.equalsIgnoreCase(metricsTimeIntervalEnum.getName())) {
                 retVal = metricsTimeIntervalEnum;
                 break;
             }

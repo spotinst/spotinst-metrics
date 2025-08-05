@@ -30,21 +30,25 @@ elastic:
   connectionTimeout: 3000
   socketTimeout: 90000
   clusterRegion: us-east-2
-  indexNameOverriddenPatterns: ["spot_storage", "azure_stateful_opt", "azure_ocean_opt" ]
+
+  # Search type supported: exact_match (using all text fields defaults to keyword - this is the default template), full_text (multi field - both text and keyword)
+  indexes:
+    - name: opt_metrics
+      templateFileName: opt_metrics
+      searchType: exact_match
+    - name: azure_ocean_opt
+      templateFileName: azure_ocean_opt
+      searchType: exact_match
+    - name: azure_commitments_opt
+      templateFileName: azure_commitments_opt
+      searchType: exact_match
+    - name: azure_stateful_opt
+      templateFileName: azure_stateful_opt
+      searchType: exact_match
+
+  #Credsentials for the elastic cluster
   username: elastic
-  password: 6631C3Y2id8qXbFJg79xDrU0
-
-  indexNamePatterns:
-    # Add an index name pattern to be used by the get statistics requests
-    readPattern: "opt_%s"
-
-    # Add an index name pattern to be used by the get aggregative statistics requests
-    aggregationReadPattern: "agg_%s"
-
-    # Add an index name pattern to be used in the report metrics
-    # For optimized index, prefix MUST BE ALIGNED WITH CLUSTER TEMPLATE of 'opt_*'
-    #    writePattern: "opt_%s_test"
-    writePattern: "opt_%s"
+  password: 7d3W8CdvcNHn579478HA5jWx
 
   bulkProcessorIndexer:
 
@@ -121,25 +125,11 @@ featureFlags:
 server:
   applicationConnectors:
     - type: http
-      port: 4100
+      port: 7500
 
   adminConnectors:
     - type: http
-      port: 4101
-
-
-##############################################
-#                    REDIS
-##############################################
-redisConfiguration:
-  host: redis-public.dev.spotinst.com
-  port: 6379
-  timeout: 2000 #timeout for connection
-  poolMaxTotal: 1000 #Maximum number of resources to create at a given time.
-  poolMaxIdle: 300 # max idle connections
-  poolMaxWaitMillis: 1000 #Max milliseconds a resource can go unused before it should be destroyed.
-  poolMinIdle: 100 #Minimum number of resources to keep in pool at any given time
-
+      port: 7501
 
 queryConfig:
   # Limit the amount of dimension keys that can be asked for in a single request

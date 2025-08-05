@@ -7,7 +7,7 @@ import org.apache.commons.collections4.MapUtils;
 
 import java.util.Map;
 
-import static com.spotinst.metrics.bl.index.spotinst.BaseIndexManager2.roundFix;
+import static com.spotinst.metrics.bl.index.spotinst.RawIndexManager.roundFix;
 
 public class MetricSumParser implements IMetricStatParser {
 

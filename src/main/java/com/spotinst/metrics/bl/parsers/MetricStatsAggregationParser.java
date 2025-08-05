@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class MetricStatsAggregationParser extends BaseMetricAggregationParser<ElasticMetricStatisticsRequest> {
 
@@ -29,8 +30,8 @@ public class MetricStatsAggregationParser extends BaseMetricAggregationParser<El
     @Override
     public Map<AggCompositeKey, Map<String, Aggregate>> parse(
             Map<AggCompositeKey, Map<String, Aggregate>> aggsMapByKeys,
-            Map<String, ElasticMetricAggregations> byRefResultMap) {
-        if (aggsMapByKeys == null || aggsMapByKeys.isEmpty()) {
+            Map<String, ElasticMetricAggregations> resultMap) {
+        if (MapUtils.isEmpty(aggsMapByKeys)) {
             String msg = "No aggregations to parse, skipping METRIC STATS aggregation parser";
             LOGGER.debug(msg);
             return aggsMapByKeys;
@@ -39,9 +40,8 @@ public class MetricStatsAggregationParser extends BaseMetricAggregationParser<El
         MetricStatisticEnum statistic  = metricStatisticsRequest.getStatistic();
         IMetricStatParser   statParser = MetricStatsParserFactory.getParser(statistic);
 
-        // <MetricKey, <TimeStamp, DataPoint>>
         Map<String, Map<String, ElasticMetricDatapoint>> dataPointsByTimeStampByMetricKey =
-                createMetricKeyToDataPointByTimestampMap(byRefResultMap);
+                createMetricKeyToDataPointByTimestampMap(resultMap);
 
         // Next depth map
         Map<AggCompositeKey, Map<String, Aggregate>> nextDepth = new HashMap<>();
@@ -60,17 +60,18 @@ public class MetricStatsAggregationParser extends BaseMetricAggregationParser<El
                 continue;
             }
 
-            Map<String, ElasticMetricDatapoint> byTimestamp = dataPointsByTimeStampByMetricKey.get(metricKey);
-            if (MapUtils.isNotEmpty(byTimestamp)) {
+            Map<String, ElasticMetricDatapoint> dpByTimestampMap = dataPointsByTimeStampByMetricKey.get(metricKey);
+
+            if (MapUtils.isNotEmpty(dpByTimestampMap)) {
                 // When a time interval is used, we need to glue each data point to its relevant time
-                ElasticMetricDatapoint dp = byTimestamp.get(timestampKey);
+                ElasticMetricDatapoint dp = dpByTimestampMap.get(timestampKey);
 
                 if (dp == null) {
                     dp = new ElasticMetricDatapoint();
                 }
+
                 dp.setTimestamp(timestampKey);
                 dp.setStatistics(statistics);
-
             }
             else {
                 // In this case dimension is without timestamp since no time interval was used, just add as is
@@ -79,8 +80,8 @@ public class MetricStatsAggregationParser extends BaseMetricAggregationParser<El
 
                 ElasticMetricAggregations esMetricAggregations;
 
-                if (byRefResultMap.containsKey(metricKey)) {
-                    esMetricAggregations = byRefResultMap.get(metricKey);
+                if (resultMap.containsKey(metricKey)) {
+                    esMetricAggregations = resultMap.get(metricKey);
                     esMetricAggregations.addDatapoint(dp);
                 }
                 else {
@@ -88,7 +89,7 @@ public class MetricStatsAggregationParser extends BaseMetricAggregationParser<El
                     // meaning it is the highest in the parsers stack
                     esMetricAggregations = new ElasticMetricAggregations();
                     esMetricAggregations.addDatapoint(dp);
-                    byRefResultMap.put(metricKey, esMetricAggregations);
+                    resultMap.put(metricKey, esMetricAggregations);
                 }
             }
         }
@@ -102,23 +103,20 @@ public class MetricStatsAggregationParser extends BaseMetricAggregationParser<El
     }
 
     private Map<String, Map<String, ElasticMetricDatapoint>> createMetricKeyToDataPointByTimestampMap(
-            Map<String, ElasticMetricAggregations> byRefResultMap) {
+            Map<String, ElasticMetricAggregations> resultMap) {
         Map<String, Map<String, ElasticMetricDatapoint>> retVal = new HashMap<>();
 
-        for (String byRefKey : byRefResultMap.keySet()) {
-            ElasticMetricAggregations metAgg = byRefResultMap.get(byRefKey);
-            if (metAgg == null) {
-                continue;
-            }
+        for (Map.Entry<String, ElasticMetricAggregations> entry : resultMap.entrySet()) {
+            String                    key       = entry.getKey();
+            ElasticMetricAggregations aggResult = entry.getValue();
 
-            List<ElasticMetricDatapoint> datapoints = metAgg.getDatapoints();
-            if (CollectionUtils.isEmpty(datapoints)) {
-                continue;
-            }
+            if (Objects.nonNull(aggResult) && CollectionUtils.isNotEmpty(aggResult.getDatapoints())) {
+                List<ElasticMetricDatapoint> datapoints = aggResult.getDatapoints();
 
-            Map<String, ElasticMetricDatapoint> dpByTimeStamp = new HashMap<>();
-            datapoints.forEach(dp -> dpByTimeStamp.put(dp.getTimestamp(), dp));
-            retVal.put(byRefKey, dpByTimeStamp);
+                Map<String, ElasticMetricDatapoint> dpByTimeStamp = new HashMap<>();
+                datapoints.forEach(dp -> dpByTimeStamp.put(dp.getTimestamp(), dp));
+                retVal.put(key, dpByTimeStamp);
+            }
         }
 
         return retVal;

@@ -11,6 +11,7 @@ import com.spotinst.metrics.commons.converters.PercentilesConverter;
 import com.spotinst.metrics.dal.models.elastic.requests.ElasticPercentilesRequest;
 import com.spotinst.metrics.dal.models.elastic.responses.ElasticPercentilesResponse;
 import com.spotinst.metrics.dal.services.elastic.IElasticSearchPercentilesService;
+import com.spotinst.metrics.dal.services.elastic.metric.ElasticSearchPercentilesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,14 +20,14 @@ public class PercentilesRepo implements IPercentilesRepo {
     //region Members
     private static final Logger LOGGER = LoggerFactory.getLogger(PercentilesRepo.class);
 
-    private IElasticSearchPercentilesService elasticPercentilesService;
+    private ElasticSearchPercentilesService elasticPercentilesService;
 
     public PercentilesRepo() {
         initInjections();
     }
 
     private void initInjections() {
-        this.elasticPercentilesService = MetricsAppContext.getInstance().getElasticSearchPercentilesService();
+        this.elasticPercentilesService = new ElasticSearchPercentilesService();
     }
 
     //region Override Methods
