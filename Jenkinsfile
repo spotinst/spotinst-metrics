@@ -20,7 +20,5 @@ javaMCPipeline(
     svcName,
     pod,
     clouds,
-    defaultBranch,
-    additionalDeployments,
-    prodDeployType
+    defaultBranch
 )
