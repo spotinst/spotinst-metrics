@@ -8,16 +8,70 @@ coreDbToken: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzcG90aW5zdCIsImV4cC
 ##############################################
 #                SWAGGER
 ##############################################
-swagger:
-  resourcePackage: com.spotinst.service.api.resources.app
+#swagger:
+#  resourcePackage: com.spotinst.service.api.resources.app
 
 ##############################################
 #                SERVICES
 ##############################################
 services:
-  eventsServiceUrl: http://events-public.dev.spotinst.com:2300
+  ##  eventsServiceUrl: http://events-public.dev.spotinst.com:2300
   dbServiceUrl: http://db-java-public.dev.spotinst.com:2100
   umsServiceUrl: http://ums-public.dev.spotinst.com:4100
+
+##############################################
+#                ELASTIC
+##############################################
+elastic:
+  scheme: http
+  host: es-analytics.dev.spotinst.com
+  port: 9200
+  # Values in ms
+  connectionTimeout: 3000
+  socketTimeout: 90000
+  clusterRegion: us-east-2
+
+  # Search type supported: exact_match (using all text fields defaults to keyword - this is the default template), full_text (multi field - both text and keyword)
+  indexes:
+    - name: opt_metrics
+      templateFileName: opt_metrics
+      searchType: exact_match
+    - name: azure_ocean_opt
+      templateFileName: azure_ocean_opt
+      searchType: exact_match
+    - name: azure_commitments_opt
+      templateFileName: azure_commitments_opt
+      searchType: exact_match
+    - name: azure_stateful_opt
+      templateFileName: azure_stateful_opt
+      searchType: exact_match
+
+  #Credsentials for the elastic cluster
+  username: elastic
+  password: 7d3W8CdvcNHn579478HA5jWx
+
+  bulkProcessorIndexer:
+
+    # Sets when to flush a new bulk request based on the number of actions currently added
+    bufferedActions: 1000
+
+    # Sets when to flush a new bulk request based on the size of actions currently added
+    sizeInMB: 5
+
+    # Sets a flush interval flushing *any* bulk actions pending if the interval passes
+    flushIntervalInSeconds: 5
+
+    # Sets the number of concurrent requests allowed to be executed
+    concurrentRequests: 16
+
+    # Provides a backoff policy for bulk requests for whenever a bulk request is rejected due to resource constraints
+    backoffPolicyConfig:
+
+      # The initial delay defines how long to wait for the first retry attempt
+      initialDelayMs: 100
+
+      # The maximum number of retries. Must be a non-negative number
+      numOfRetries: 3
 
 
 ##############################################
@@ -33,14 +87,14 @@ httpClientDefaultRetryCount: 3
 ##############################################
 #                RATE LIMIT
 ##############################################
-rateLimit:
-  byOrganization:
-    organizationDefault: 300
-    organizations:
-      606079861234: 400
-
-  byMySql:
-    mySqlDefault: 1000
+#rateLimit:
+#  byOrganization:
+#    organizationDefault: 300
+#    organizations:
+#      606079861234: 400
+#
+#  byMySql:
+#    mySqlDefault: 1000
 
 
 ##############################################
@@ -71,24 +125,24 @@ featureFlags:
 server:
   applicationConnectors:
     - type: http
-      port: 4100
+      port: 7500
 
   adminConnectors:
     - type: http
-      port: 4101
+      port: 7501
 
+queryConfig:
+  # Limit the amount of dimension keys that can be asked for in a single request
+  # Every dimensions has its own terms aggregation on the elastic search, must be limited
+  dimensionsKeysRequestLimit: 50
 
-##############################################
-#                    REDIS
-##############################################
-redisConfiguration:
-  host: redis-public.dev.spotinst.com
-  port: 6379
-  timeout: 2000 #timeout for connection
-  poolMaxTotal: 1000 #Maximum number of resources to create at a given time.
-  poolMaxIdle: 300 # max idle connections
-  poolMaxWaitMillis: 1000 #Max milliseconds a resource can go unused before it should be destroyed.
-  poolMinIdle: 100 #Minimum number of resources to keep in pool at any given time
+  # Indicate how many values should be returned for each dimension key
+  # This is the maximum cap for items in each terms aggregation bucket
+  dimensionsValuesResultPerBucketLimit: 100
+
+  # Limit the amount of indices we're enabling to query for
+  # If query limit is exceeded, we'll set a new date range of NOW - (last 30 days)
+  queryTimeLimitInDays: 32
 
 
 ##############################################
