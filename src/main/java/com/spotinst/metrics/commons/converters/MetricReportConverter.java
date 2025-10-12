@@ -31,12 +31,16 @@ import java.util.stream.Collectors;
 
 public class MetricReportConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(MetricReportConverter.class);
+
     public static BlMetricReportRequest apiToBl(ApiMetricsReportRequest apiRequest) {
         BlMetricReportRequest retVal = new BlMetricReportRequest();
 
-        List<BlMetricDocument> blMetricDocuments =
-                apiRequest.getMetricDocuments().stream().map(MetricReportConverter::apiToBl).collect(Collectors.toList());
-        retVal.setMetricDocuments(blMetricDocuments);
+        if (CollectionUtils.isNotEmpty(apiRequest.getMetricDocuments())) {
+            List<BlMetricDocument> blMetricDocuments =
+                    apiRequest.getMetricDocuments().stream().map(MetricReportConverter::apiToBl)
+                              .collect(Collectors.toList());
+            retVal.setMetricDocuments(blMetricDocuments);
+        }
 
         return retVal;
     }
@@ -88,37 +92,38 @@ public class MetricReportConverter {
     }
 
     public static ApiMetricStatisticsResponse blToApi(BlMetricStatisticsResponse response) {
-        ApiMetricStatisticsResponse retVal = EntitiesMapper.instance.mapType(response, ApiMetricStatisticsResponse.class);
+        ApiMetricStatisticsResponse retVal =
+                EntitiesMapper.instance.mapType(response, ApiMetricStatisticsResponse.class);
         return retVal;
     }
 
     public static ElasticMetricReportRequest toEs(BlMetricReportRequest request) {
-        ElasticMetricReportRequest retVal = new ElasticMetricReportRequest();
+        ElasticMetricReportRequest  retVal         = new ElasticMetricReportRequest();
         List<ElasticMetricDocument> esDocumentList = new ArrayList<>();
 
         if (request != null && CollectionUtils.isEmpty(request.getMetricDocuments()) == false) {
-            for (BlMetricDocument blDocument : request.getMetricDocuments()){
+            for (BlMetricDocument blDocument : request.getMetricDocuments()) {
                 ElasticMetricDocument esDocument = new ElasticMetricDocument();
-                
-                if (CollectionUtils.isEmpty(blDocument.getMetrics()) == false){
+
+                if (CollectionUtils.isEmpty(blDocument.getMetrics()) == false) {
                     Map<String, ElasticMetric> esMetrics = convertMetricsBlToDal(blDocument.getMetrics());
                     esDocument.setMetrics(esMetrics);
                 }
 
-                if (CollectionUtils.isEmpty(blDocument.getDimensions()) == false){
+                if (CollectionUtils.isEmpty(blDocument.getDimensions()) == false) {
                     Map<String, String> esDimensions = convertDimensionsBlToDal(blDocument.getDimensions());
                     esDocument.setDimensions(esDimensions);
                 }
-                
-                if (blDocument.getAccountId() != null){
+
+                if (blDocument.getAccountId() != null) {
                     esDocument.setAccountId(blDocument.getAccountId());
                 }
-                
-                if (blDocument.getNamespace() != null){
+
+                if (blDocument.getNamespace() != null) {
                     esDocument.setNamespace(blDocument.getNamespace());
                 }
-                
-                if (blDocument.getTimestamp() != null){
+
+                if (blDocument.getTimestamp() != null) {
                     esDocument.setTimestamp(blDocument.getTimestamp());
                 }
                 esDocumentList.add(esDocument);
@@ -136,7 +141,7 @@ public class MetricReportConverter {
     private static Map<String, String> convertDimensionsBlToDal(List<BlMetricDimension> dimensions) {
         Map<String, String> retVal = new HashMap<>();
 
-        for (BlMetricDimension blDimension : dimensions){
+        for (BlMetricDimension blDimension : dimensions) {
             retVal.put(blDimension.getName(), blDimension.getValue());
         }
         return retVal;
@@ -144,8 +149,8 @@ public class MetricReportConverter {
 
     private static Map<String, ElasticMetric> convertMetricsBlToDal(List<BlMetric> metrics) {
         Map<String, ElasticMetric> retVal = new HashMap<>();
-        
-        for (BlMetric blMetric : metrics){
+
+        for (BlMetric blMetric : metrics) {
             ElasticMetric esMetric = new ElasticMetric();
             esMetric.setName(blMetric.getName());
             esMetric.setCount(blMetric.getCount());

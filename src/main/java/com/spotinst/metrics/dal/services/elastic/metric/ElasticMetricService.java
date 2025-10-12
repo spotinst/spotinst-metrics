@@ -23,7 +23,6 @@ import com.spotinst.metrics.dal.models.elastic.responses.ElasticMetricReportResp
 import com.spotinst.metrics.dal.models.elastic.responses.ElasticMetricStatisticsResponse;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -154,9 +153,9 @@ public class ElasticMetricService {
                                 .searchType(QueryThenFetch).explain(false);
 
             List<String> dimensionKeys = request.getDimensionKeys();
+
             if (CollectionUtils.isNotEmpty(dimensionKeys)) {
                 // It is important to distinct the requested dimension keys to prevent ElasticSearch aggregation builder error
-                // Cannot construct two aggregations with the same name
                 List<String> distinctDimKeys = dimensionKeys.stream().distinct().collect(Collectors.toList());
                 request.setDimensionKeys(distinctDimKeys);
             }
@@ -169,22 +168,18 @@ public class ElasticMetricService {
             SearchRequest searchRequest = searchRequestBuilder.build();
 
             // Execute
-            StopWatch sw = new StopWatch();
-            sw.start();
-
             SearchResponse<ElasticDimensionsValuesResponse> searchResponse =
                     elasticsearchClient.search(searchRequest, ElasticDimensionsValuesResponse.class);
 
-            sw.stop();
-            LOGGER.info(String.format("Elastic search query on indices [%s] took [%s]ms", indicesNames, sw.getTime()));
+            LOGGER.info(String.format("Elastic search query on indices [%s] took [%s]ms", indicesNames,
+                                      searchResponse.took()));
 
             // Parse elastic search response
             retVal = manager.parseResponse(searchResponse);
-
         }
         catch (Exception ex) {
-            String errorMessage = String.format("Failed getting dimensions values from elastic search for request: %s",
-                                                request.toString());
+            String errorMessage =
+                    String.format("Failed getting dimensions values from elastic search for request: %s", request);
             LOGGER.error(errorMessage, ex);
             throw new DalException(errorMessage, ex);
         }

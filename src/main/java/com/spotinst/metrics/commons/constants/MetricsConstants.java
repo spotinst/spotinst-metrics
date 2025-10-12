@@ -3,17 +3,15 @@ package com.spotinst.metrics.commons.constants;
 public class MetricsConstants {
 
     public static class Resources {
-        public static final String METRICS_RESOURCE_PATH = "/metrics";
+        public static final String METRICS_RESOURCE_PATH = "/metric";
     }
 
     public static class FieldPath {
-        public static final String METRIC_COUNT_FIELD_PATH_FORMAT     = "metrics.%s.count";
-        public static final String METRIC_VALUE_FIELD_PATH_FORMAT     = "metrics.%s.value";
-        public static final String METRIC_STATISTIC_FIELD_PATH_FORMAT = "metrics.%s.%s";
-        public static final String METRIC_KEYWORD_SUFFIX              = ".keyword";
-        public static final String ACCOUNT_ID_DIMENSION_NAME          = "account_id";
-        public static final String ACCOUNT_ID_RAW_DIMENSION_NAME      = "accountId";
-        public static final String DIMENSION_FIELD_PATH_FORMAT        = "dimensions.%s";
+        public static final String METRIC_COUNT_FIELD_PATH_FORMAT = "metrics.%s.count";
+        public static final String METRIC_VALUE_FIELD_PATH_FORMAT = "metrics.%s.value";
+        public static final String METRIC_KEYWORD_SUFFIX          = ".keyword";
+        public static final String ACCOUNT_ID_RAW_DIMENSION_NAME  = "accountId";
+        public static final String DIMENSION_FIELD_PATH_FORMAT    = "dimensions.%s";
     }
 
     public static class Namespace {
