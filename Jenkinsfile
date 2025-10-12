@@ -12,9 +12,11 @@ def pod = renderPod(
 
 def svcName = currentBuild.rawBuild.project.parent.displayName
 def clouds = ['aws']
+def defaultBranch = 'main'
 
 javaMCPipeline(
     svcName,
     pod,
-    clouds
+    clouds,
+    defaultBranch
 )
