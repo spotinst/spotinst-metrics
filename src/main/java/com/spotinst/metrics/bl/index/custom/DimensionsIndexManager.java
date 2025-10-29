@@ -84,9 +84,7 @@ public class DimensionsIndexManager {
         boolQueryBuilder.should(existsQueries.stream().map(ExistsQuery::_toQuery).toList());
 
         // Append account ID on filter to enforce data ownership
-        if (dataOwnershipQuery != null) {
-            boolQueryBuilder.filter(b -> b.bool(dataOwnershipQuery));
-        }
+        boolQueryBuilder.filter(b -> b.bool(dataOwnershipQuery));
 
         srb.query(f -> f.bool(boolQueryBuilder.build()));
 
@@ -101,7 +99,7 @@ public class DimensionsIndexManager {
         List<ExistsQuery> existQueries  = new ArrayList<>();
         List<String>      dimensionKeys = request.getDimensionKeys();
 
-        if (dimensionKeys == null || dimensionKeys.isEmpty()) {
+        if (CollectionUtils.isEmpty(dimensionKeys)) {
             String errMsg = "dimensions keys are missing in the get metric dimensions request";
             LOGGER.error(errMsg);
             throw new DalException(errMsg);

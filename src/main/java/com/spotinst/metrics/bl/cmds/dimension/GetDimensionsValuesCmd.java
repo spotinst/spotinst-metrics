@@ -11,12 +11,12 @@ import com.spotinst.metrics.bl.model.response.BlMetricStatisticsResponse;
 import com.spotinst.metrics.bl.repos.RepoManager;
 import com.spotinst.metrics.commons.configuration.QueryConfig;
 import com.spotinst.metrics.commons.utils.ContextUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Created by zachi.nachshon on 1/17/17.
@@ -36,11 +36,7 @@ public class GetDimensionsValuesCmd extends BaseCmd<BlMetricStatisticsResponse> 
     }
 
     public BlDimensionsValuesResponse execute(BlDimensionsValuesRequest request, String index) {
-
         LOGGER.info("Start fetching dimensions values...");
-
-        // Validate namespace does not contain 'spotinst/balancer' prefix
-        // validateNamespace(request);
 
         // Validate the amount of unique dimensions does not exceed the configurable value
         validateDimensionKeysAmount(request);
@@ -48,14 +44,12 @@ public class GetDimensionsValuesCmd extends BaseCmd<BlMetricStatisticsResponse> 
         // Set account id on metric stats request to enforce data ownership
         ContextUtils.setCtxAccountOnRequest(request);
 
-        // Data ownership is being enforced by placing the account id from the context on the elastic search query
         BlDimensionsValuesResponse retVal;
         RepoGenericResponse<BlDimensionsValuesResponse> response =
                 RepoManager.metricRepo.getDimensionsValues(request, index);
 
-        if (response.isRequestSucceed() == false || response.getValue() == null) {
-            LOGGER.error("Failed to get dimensions values: {}. Errors: {}", request.toString(),
-                         response.getDalErrors());
+        if (BooleanUtils.isFalse(response.isRequestSucceed()) || response.getValue() == null) {
+            LOGGER.error("Failed to get dimensions values: {}. Errors: {}", request, response.getDalErrors());
             throw new BlException(ErrorCodes.FAILED_TO_GET_DIMENSIONS_VALUES, "Failed to get dimensions values");
         }
 

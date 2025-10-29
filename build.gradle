@@ -7,7 +7,7 @@ plugins {
 group 'com.spotinst'
 version = theVersion
 
-def lombokVersion  = '1.18.30'
+def lombokVersion = '1.18.30'
 
 // Use Java 21
 java {
@@ -44,7 +44,6 @@ dependencies {
 //            'com.spotinst:spotinst-dropwizard-v4:4.0.3-SNAPSHOT',
             'com.spotinst:spotinst-dropwizard-v4:4.0.15',
             'co.elastic.clients:elasticsearch-java:9.0.0',
-            //          'co.elastic.clients:elasticsearch-java:8.16.1',
             'vc.inreach.aws:aws-signing-request-interceptor:0.0.22',
             'com.spotinst:spotinst-messaging:2.0.1',
             'org.hibernate:hibernate-validator:8.0.0.Final',
@@ -52,14 +51,11 @@ dependencies {
 
             // Swagger - optional
             'com.smoketurner:dropwizard-swagger:4.0.5-1',
-            'io.swagger:swagger-jersey2-jaxrs:1.6.13'
-    )
+            'io.swagger:swagger-jersey2-jaxrs:1.6.13')
 
-    testImplementation(
-            'junit:junit:4.13.2',
+    testImplementation('junit:junit:4.13.2',
             'io.dropwizard:dropwizard-testing:4.0.7',
-            'org.mockito:mockito-core:5.10.0'
-    )
+            'org.mockito:mockito-core:5.10.0')
 
     compileOnly('org.projectlombok:lombok:' + lombokVersion)
     annotationProcessor('org.projectlombok:lombok:' + lombokVersion)
