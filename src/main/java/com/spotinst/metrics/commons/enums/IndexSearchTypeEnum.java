@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 import java.lang.invoke.MethodHandles;
 
 public enum IndexSearchTypeEnum implements INamedEnum {
-    FULL_TEXT("fullText"),
-    EXACT_MATCH("exactMatch");
+    FULL_TEXT("full_text"),
+    EXACT_MATCH("exact_match");
 
     //region Members
     private final        String name;
