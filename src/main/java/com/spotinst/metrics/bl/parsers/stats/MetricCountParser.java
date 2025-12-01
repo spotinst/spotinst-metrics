@@ -16,9 +16,10 @@ public class MetricCountParser implements IMetricStatParser {
         ElasticMetricStatistics retVal = null;
 
         if (MapUtils.isNotEmpty(aggregateMap)) {
-            ValueCountAggregate valueCount = aggregateMap.get(Aggregate.Kind.ValueCount.name()).valueCount();
+            Aggregate aggregation = aggregateMap.get(Aggregate.Kind.ValueCount.name());
 
-            if (valueCount != null) {
+            if (aggregation != null) {
+                ValueCountAggregate valueCount = aggregateMap.get(Aggregate.Kind.ValueCount.name()).valueCount();
                 retVal = new ElasticMetricStatistics();
                 retVal.setCount(roundFix(valueCount.value(), 10));
             }

@@ -16,9 +16,11 @@ public class MetricAverageParser implements IMetricStatParser {
 
 
         if (MapUtils.isNotEmpty(aggregateMap)) {
-            AvgAggregate avgAggregate = aggregateMap.get(Aggregate.Kind.Avg.name()).avg();
+            Aggregate aggregation = aggregateMap.get(Aggregate.Kind.Avg.name());
 
-            if (avgAggregate != null) {
+            if (aggregation != null) {
+                AvgAggregate avgAggregate = aggregateMap.get(Aggregate.Kind.Avg.name()).avg();
+
                 retVal = new ElasticMetricStatistics();
                 retVal.setAverage(roundFix(avgAggregate.value(), 10));
             }

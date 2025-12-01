@@ -37,14 +37,16 @@ public class MetricDateHistogramAggregationParser extends BaseMetricAggregationP
             Map<String, Aggregate> aggs       = aggsMapByKeys.get(compositeKey);
             String                 metricName = compositeKey.getTermKey();
 
-            DateHistogramAggregate histogram = aggs.get(aggregationName).dateHistogram();
+            Aggregate aggregation = aggs.get(aggregationName);
 
-            if (Objects.isNull(histogram)) {
+            if (Objects.isNull(aggregation)) {
                 String msg =
                         "Cannot get elastic search date histogram buckets for [%s], skipping to the next aggregation level/sibling";
                 LOGGER.debug(String.format(msg, aggregationName));
                 continue;
             }
+
+            DateHistogramAggregate histogram = aggregation.dateHistogram();
 
             List<DateHistogramBucket> buckets = histogram.buckets().array();
 

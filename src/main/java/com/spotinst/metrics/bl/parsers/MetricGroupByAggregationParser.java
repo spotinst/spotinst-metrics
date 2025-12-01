@@ -50,19 +50,20 @@ public class MetricGroupByAggregationParser extends BaseMetricAggregationParser<
         Map<AggCompositeKey, Map<String, Aggregate>> nextDepth = new HashMap<>();
 
         for (AggCompositeKey key : aggsMapByKeys.keySet()) {
-            String                 termKey = key.getTermKey();
-            Map<String, Aggregate> aggs    = aggsMapByKeys.get(key);
-            StringTermsAggregate   terms   = aggs.get(aggregationName).sterms();
+            String                 termKey     = key.getTermKey();
+            Map<String, Aggregate> aggs        = aggsMapByKeys.get(key);
+            Aggregate              aggregation = aggs.get(aggregationName);
 
-            if (terms == null) {
+            if (aggregation == null) {
                 String msg =
                         "Cannot get elastic search term buckets for [%s], skipping to the next aggregation level/sibling";
                 LOGGER.debug(String.format(msg, aggregationName));
                 continue;
             }
 
-            List<String> groupByValues = metricStatisticsRequest.getGroupBy();
-            String       groupByValue  = "";
+            StringTermsAggregate terms         = aggregation.sterms();
+            List<String>         groupByValues = metricStatisticsRequest.getGroupBy();
+            String               groupByValue  = "";
 
             // Group by values should not be empty if we've registered the GroupBy aggregator parser
             if (CollectionUtils.isNotEmpty(groupByValues)) {

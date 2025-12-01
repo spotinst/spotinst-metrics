@@ -16,9 +16,10 @@ public class MetricSumParser implements IMetricStatParser {
         ElasticMetricStatistics retVal = null;
 
         if (MapUtils.isNotEmpty(aggregateMap)) {
-            SumAggregate sumAggregate = aggregateMap.get(Aggregate.Kind.Sum.name()).sum();
+            Aggregate aggregation = aggregateMap.get(Aggregate.Kind.Sum.name());
 
-            if (sumAggregate != null) {
+            if (aggregation != null) {
+                SumAggregate sumAggregate = aggregation.sum();
                 retVal = new ElasticMetricStatistics();
                 retVal.setSum(roundFix(sumAggregate.value(), 10));
             }
