@@ -1,4 +1,4 @@
-@Library('utils') _
+@Library('utils@chore/slack-send-SPOTDS-7216') _
 import com.spotinst.GlobalVars
 
 def pod = renderPod(
