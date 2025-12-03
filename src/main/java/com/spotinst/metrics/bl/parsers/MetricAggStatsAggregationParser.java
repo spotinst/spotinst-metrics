@@ -70,7 +70,6 @@ public class MetricAggStatsAggregationParser extends BaseMetricAggregationParser
                 }
                 dp.setTimestamp(timestampKey);
                 dp.setStatistics(statistics);
-
             }
             else {
                 // In this case dimension is without timestamp since no time interval was used, just add as is

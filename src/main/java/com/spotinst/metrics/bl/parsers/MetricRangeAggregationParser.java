@@ -28,6 +28,7 @@ public class MetricRangeAggregationParser extends BaseMetricAggregationParser<El
     public Map<AggCompositeKey, Map<String, Aggregate>> parse(
             Map<AggCompositeKey, Map<String, Aggregate>> aggsMapByKeys,
             Map<String, ElasticMetricAggregations> byRefResultMap) {
+
         if (aggsMapByKeys == null || aggsMapByKeys.isEmpty()) {
             String msg = "No aggregations to parse, skipping RANGE aggregation parser";
             LOGGER.debug(msg);
@@ -54,14 +55,16 @@ public class MetricRangeAggregationParser extends BaseMetricAggregationParser<El
             String                 termKey = compositeKey.getTermKey();
             Map<String, Aggregate> aggs    = aggsMapByKeys.get(compositeKey);
 
-            RangeAggregate rangeAggregate = aggs.get(aggregationName).range();
+            Aggregate aggregation = aggs.get(aggregationName);
 
-            if (rangeAggregate == null) {
+            if (aggregation == null) {
                 String msg =
                         "Cannot get elastic search range buckets for [%s], skipping to the next aggregation level/sibling";
                 LOGGER.debug(String.format(msg, aggregationName));
                 continue;
             }
+
+            RangeAggregate rangeAggregate = aggregation.range();
 
             LOGGER.debug(String.format("Starting to create response objects for RANGE aggregation value [%s]",
                                        aggregationName));

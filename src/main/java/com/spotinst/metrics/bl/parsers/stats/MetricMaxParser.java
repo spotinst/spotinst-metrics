@@ -17,9 +17,11 @@ public class MetricMaxParser implements IMetricStatParser {
 
         if (MapUtils.isNotEmpty(aggregateMap)) {
 
-            MaxAggregate maxAggregate = aggregateMap.get(Aggregate.Kind.Max.name()).max();
+            Aggregate aggregation = aggregateMap.get(Aggregate.Kind.Max.name());
 
-            if (maxAggregate != null) {
+            if (aggregation != null) {
+                MaxAggregate maxAggregate = aggregation.max();
+
                 retVal = new ElasticMetricStatistics();
                 retVal.setMaximum(roundFix(maxAggregate.value(), 10));
             }

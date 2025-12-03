@@ -16,9 +16,11 @@ public class MetricMinParser implements IMetricStatParser {
         ElasticMetricStatistics retVal = null;
 
         if (MapUtils.isNotEmpty(aggregateMap)) {
-            MinAggregate minAggregate = aggregateMap.get(Aggregate.Kind.Min.name()).min();
+            Aggregate aggregation = aggregateMap.get(Aggregate.Kind.Min.name());
 
-            if (minAggregate != null) {
+            if (aggregation != null) {
+                MinAggregate minAggregate = aggregation.min();
+
                 retVal = new ElasticMetricStatistics();
                 retVal.setMinimum(roundFix(minAggregate.value(), 10));
             }
